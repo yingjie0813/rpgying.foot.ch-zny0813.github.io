@@ -1,0 +1,716 @@
+
+/* ==================== 全域設定 ==================== */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: "Noto Serif TC", "Microsoft JhengHei", serif;
+    color: #3f3528;
+}
+
+button {
+    font-family: inherit;
+    cursor: pointer;
+}
+
+
+/* ==================== 畫面共用設定 ==================== */
+
+.start-screen,
+.game-screen,
+.boss-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100vh;
+}
+
+/* hidden 優先隱藏畫面 */
+.start-screen[hidden],
+.game-screen[hidden],
+.boss-screen[hidden] {
+    display: none;
+}
+
+
+/* ==================== 開始畫面 ==================== */
+
+.start-screen {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 24px;
+
+    background:
+        radial-gradient(circle at center, #fff9e9 0%, #ead9b8 100%);
+}
+
+.start-card {
+    width: min(560px, 100%);
+    min-height: 420px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    padding: 48px 32px;
+
+    background: rgba(255, 252, 240, 0.9);
+    border: 2px solid #c6a66b;
+    border-radius: 12px;
+
+    box-shadow: 0 12px 35px rgba(83, 59, 28, 0.15);
+
+    text-align: center;
+}
+
+.start-subtitle {
+    color: #9a7945;
+    letter-spacing: 4px;
+    font-size: 14px;
+}
+
+#start-screen-title {
+    margin: 20px 0 12px;
+
+    color: #684522;
+    font-size: clamp(32px, 6vw, 48px);
+    letter-spacing: 5px;
+}
+
+#start-screen-p {
+    margin-bottom: 40px;
+
+    color: #806b4d;
+    letter-spacing: 2px;
+}
+
+/* ==================== 玩家名字輸入框 ==================== */
+
+#player-name-input {
+    width: min(280px, 100%);
+    padding: 12px 16px;
+    margin-bottom: 24px;
+
+    background: #fffaf0;
+    border: 1px solid #c6a66b;
+    border-radius: 6px;
+
+    color: #594126;
+    font-family: inherit;
+    font-size: 16px;
+    text-align: center;
+    letter-spacing: 2px;
+
+    outline: none;
+    transition: 0.2s;
+}
+
+/* 提示文字 */
+#player-name-input::placeholder {
+    color: #b5a184;
+    letter-spacing: 1px;
+}
+
+/* 點擊輸入框時 */
+#player-name-input:focus {
+    border-color: #a77b3e;
+    box-shadow: 0 0 8px rgba(167, 123, 62, 0.3);
+    background: #fffdf7;
+}
+
+#start-screen-button {
+    padding: 14px 48px;
+
+    border: 1px solid #a77b3e;
+    border-radius: 6px;
+
+    background: #a77b3e;
+    color: #fff8e9;
+
+    font-size: 18px;
+    letter-spacing: 3px;
+
+    transition: 0.2s;
+}
+
+#start-screen-button:hover {
+    background: #805a2e;
+    transform: translateY(-2px);
+}
+
+.start-footer {
+    margin-top: 36px;
+    color: #aa9879;
+    font-size: 12px;
+    letter-spacing: 2px;
+}
+
+
+/* ==================== 遊戲畫面總配置 ==================== */
+
+.game-screen,
+.boss-screen {
+    display: flex;
+    gap: 16px;
+
+    padding: 16px;
+
+    background: #e9e0ce;
+
+    /* 防止內部區域撐大整個畫面 */
+    overflow: hidden;
+}
+
+
+/* ==================== 左側狀態欄 ==================== */
+
+.status-panel {
+    width: 220px;
+    flex-shrink: 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    align-self: flex-start;
+
+    /* 左側內容超出時可捲動 */
+    max-height: 100%;
+    overflow-y: auto;
+}
+
+/* 玩家狀態、關卡狀態共用外觀 */
+.player-status,
+.boss-status,
+.level-status {
+    padding: 16px;
+    background: #fffaf0;
+    border: 1px solid #cbb994;
+    border-radius: 8px;
+    box-shadow: 0 3px 10px rgba(65, 48, 25, 0.08);
+}
+
+/* 區塊標題 */
+.panel-heading {
+    margin: 0 0 14px;
+    padding-bottom: 8px;
+
+    color: #96703c;
+    border-bottom: 1px solid #ddcba7;
+
+    font-size: 14px;
+    letter-spacing: 3px;
+}
+
+/* 玩家名稱 */
+.status-panel-name,
+#boss-name {
+    margin: 0 0 16px;
+
+    color: #594126;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* HP 資訊列 */
+.status-info {
+    display: flex;
+    justify-content: space-between;
+
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+/* HP 外框 */
+.hp-bar,
+#boss-hp-bar {
+    width: 100%;
+    height: 10px;
+
+    overflow: hidden;
+
+    background: #ded5c3;
+    border-radius: 10px;
+}
+
+/* HP 目前值 */
+.hp-fill,
+#boss-hp-fill {
+    width: 100%;
+    height: 100%;
+
+    background: #8caa65;
+    border-radius: 10px;
+
+    transition: width 0.3s ease;
+}
+
+/* ATK、DEF */
+.status-atk-def,
+#boss-atk-def {
+    margin-top: 14px;
+    line-height: 1.8;
+    font-size: 13px;
+}
+
+/* 關卡名稱 */
+.status-panel-level {
+    color: #684522;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* 關卡區分隔線 */
+.level-divider {
+    height: 1px;
+    margin: 12px 0;
+
+    background: #ddcba7;
+}
+
+/* 關卡狀態文字 */
+.level-status p {
+    line-height: 1.5;
+    font-size: 14px;
+}
+
+/* 事件類型 */
+.level-type {
+    display: inline-block;
+
+    padding: 4px 10px;
+
+    background: #eee3cb;
+    border-radius: 4px;
+
+    color: #87643a;
+    font-size: 12px;
+}
+
+/* 左側欄剩餘空間 */
+.sidebar-empty {
+    min-height: 60px;
+}
+
+
+/* ==================== 右側主要區域 ==================== */
+
+.main-panel {
+    min-width: 0;
+    min-height: 0;
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+
+/* ==================== 上方場景展示區 ==================== */
+
+.scene-panel {
+    /* 場景區佔右側約 40% 高度 */
+    flex: 6;
+    min-height: 0;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 16px;
+
+    background: #d4c4a5;
+    border: 1px solid #b6a17c;
+    border-radius: 8px;
+}
+
+.scene-placeholder {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    border: 1px dashed #9e8966;
+    color: #806b4d;
+}
+
+.scene-placeholder p {
+    font-size: 24px;
+    letter-spacing: 4px;
+}
+
+.scene-placeholder span {
+    font-size: 13px;
+}
+
+
+/* ==================== 下方事件操作區 ==================== */
+
+.event-panel {
+    /* 事件區佔右側約 60% 高度 */
+    flex: 4;
+    min-height: 0;
+
+    padding: 20px;
+
+    background: #fffaf0;
+    border: 1px solid #cbb994;
+    border-radius: 8px;
+
+    box-shadow: 0 3px 10px rgba(65, 48, 25, 0.08);
+
+    /* 內容太多時在這個區域內捲動 */
+    overflow-y: auto;
+}
+
+/* 事件標題 */
+.event-header {
+    margin-bottom: 18px;
+}
+
+/* 事件文字區 */
+.event-content {
+    min-height: 80px;
+    line-height: 1.8;
+}
+
+/* 事件名稱 */
+#event-title {
+    color: #684522;
+    font-size: 21px;
+    font-weight: bold;
+}
+
+/* 事件敘述 */
+#event-description {
+    color: #594f40;
+    font-size: 15px;
+}
+
+/* 事件選項區 */
+.event-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+
+    margin-top: 22px;
+}
+
+/* ==================== 事件選項按鈕 ==================== */
+
+/* 共用按鈕基本樣式 */
+.choice-button,
+#next-level-button {
+    padding: 11px 24px;
+
+    background: #eee3cb;
+    border: 1px solid #bda77e;
+    border-radius: 6px;
+
+    color: #604b2e;
+    font-family: inherit;
+    font-size: 15px;
+    letter-spacing: 1px;
+
+    transition: 0.2s;
+}
+
+/* 滑鼠移上去 */
+.choice-button:hover,
+#next-level-button:hover {
+    background: #dfc99f;
+    border-color: #9b7945;
+    transform: translateY(-2px);
+
+    box-shadow: 0 3px 8px rgba(83, 59, 28, 0.12);
+}
+
+/* 按下按鈕 */
+.choice-button:active,
+#next-level-button:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+/* 鍵盤選取時 */
+.choice-button:focus-visible,
+#next-level-button:focus-visible {
+    outline: 2px solid #9b7945;
+    outline-offset: 3px;
+}
+
+/* 繼續前行按鈕稍微醒目 */
+#next-level-button {
+    background: #a77b3e;
+    border-color: #a77b3e;
+    color: #fff8e9;
+}
+
+#next-level-button:hover {
+    background: #805a2e;
+    border-color: #805a2e;
+}
+
+/* ==================== 王關戰鬥操作區 ==================== */
+
+/* 戰鬥區左右排列 */
+.boss-battle-panel {
+    flex: 4;
+    min-height: 0;
+
+    display: flex;
+    gap: 16px;
+}
+
+/* 左側：戰鬥紀錄（70%） */
+.battle-log {
+    flex: 7;
+    min-width: 0;
+    min-height: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    padding: 20px;
+
+    background: #fffaf0;
+    border: 1px solid #cbb994;
+    border-radius: 8px;
+
+    box-shadow: 0 3px 10px rgba(65, 48, 25, 0.08);
+}
+
+/* 戰鬥紀錄的文字捲動區 */
+.battle-log-content {
+    height: 250px;
+    flex: 1;
+    min-height: 0;
+
+    overflow-y: auto;
+
+    line-height: 1.8;
+    font-size: 15px;
+}
+
+/* 右側：出拳操作（30%） */
+.battle-controls {
+    flex: 3;
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    padding: 20px;
+
+    background: #fffaf0;
+    border: 1px solid #cbb994;
+    border-radius: 8px;
+
+    box-shadow: 0 3px 10px rgba(65, 48, 25, 0.08);
+}
+
+/* 三個出拳按鈕 */
+.battle-choice-buttons {
+    width: 100%;
+
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+}
+
+/* 單個出拳按鈕 */
+.battle-choice-button {
+    aspect-ratio: 1 / 1;
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+
+    padding: 4px;
+
+    background: #eee3cb;
+    border: 1px solid #bda77e;
+    border-radius: 6px;
+
+    color: #604b2e;
+    font-size: clamp(16px, 2vw, 26px);
+
+    transition: 0.2s;
+}
+
+.battle-choice-button span {
+    font-size: 12px;
+}
+
+.battle-choice-button:hover {
+    background: #dfc99f;
+    transform: translateY(-2px);
+}
+
+/* ==================== 戰鬥繼續按鈕 ==================== */
+
+/* 目前放在三欄招式按鈕區內的繼續按鈕 */
+.battle-choice-buttons > #battle-next-button {
+    grid-column: 1 / -1; /* 橫跨三欄，填滿整個按鈕區 */
+    width: 100%;
+    min-height: 76px;
+    aspect-ratio: auto;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+
+    padding: 14px 20px;
+
+    background: linear-gradient(135deg, #b88b4c, #8e642f);
+    border: 1px solid #805a2e;
+    border-radius: 8px;
+    box-shadow: 0 4px 0 #6f4c27, 0 6px 12px rgba(83, 59, 28, 0.16);
+
+    color: #fff8e9;
+    font-family: inherit;
+    font-size: 28px;
+    letter-spacing: 2px;
+
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.battle-choice-buttons > #battle-next-button span {
+    font-size: 17px;
+    font-weight: bold;
+    letter-spacing: 3px;
+}
+
+.battle-choice-buttons > #battle-next-button:hover {
+    background: linear-gradient(135deg, #c69a5a, #a77b3e);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 #6f4c27, 0 9px 16px rgba(83, 59, 28, 0.2);
+}
+
+.battle-choice-buttons > #battle-next-button:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #6f4c27, 0 3px 7px rgba(83, 59, 28, 0.14);
+}
+
+.battle-choice-buttons > #battle-next-button:focus-visible {
+    outline: 3px solid #c69a5a;
+    outline-offset: 3px;
+}
+
+/* 保留 HTML 中舊版容器的按鈕樣式 */
+#battle-next-container {
+    width: 100%;
+    margin-top: 12px;
+}
+
+#battle-next-container #battle-next-button {
+    width: 100%;
+    padding: 12px;
+
+    background: #a77b3e;
+    border: 1px solid #a77b3e;
+    border-radius: 6px;
+
+    color: #fff8e9;
+    font-family: inherit;
+    font-size: 15px;
+}
+
+#battle-next-container #battle-next-button:hover {
+    background: #805a2e;
+}
+
+
+[hidden] {
+    display: none !important;
+}
+
+/* ==================== 小螢幕版面調整 ==================== */
+
+@media (max-width: 700px) {
+
+    .game-screen,
+    .boss-screen {
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px;
+    }
+
+    /* 手機上狀態欄改成橫向排列 */
+    .status-panel {
+        width: 100%;
+        max-height: 35%;
+        flex-shrink: 0;
+
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .player-status,
+    .level-status,
+    .boss-status {
+        padding: 10px;
+    }
+
+    .sidebar-empty {
+        display: none;
+    }
+
+    /* 右側主畫面使用剩餘高度 */
+    .main-panel {
+        flex: 1;
+        min-height: 0;
+    }
+
+    .scene-panel {
+        flex: 3;
+        min-height: 0;
+    }
+
+    .scene-placeholder p {
+        font-size: 18px;
+    }
+
+    .scene-panel {
+        padding: 10px;
+    }
+
+    .event-panel {
+        flex: 7;
+        padding: 14px;
+    }
+
+    #event-title {
+        font-size: 18px;
+    }
+
+    #event-description {
+        font-size: 14px;
+    }
+
+    .choice-button {
+        padding: 8px 14px;
+    }
+}

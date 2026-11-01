@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f3ead8">
+    <title>江湖RPG|野球外傳</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- ==================== 開始畫面 ==================== -->
+    <div class="start-screen">
+
+        <div class="start-card">
+
+            <!-- 遊戲標題 -->
+            <p class="start-subtitle">你是個學野球拳的人!</p>
+            <h1 id="start-screen-title">江湖RPG|外傳</h1>
+            <p id="start-screen-p">數值用腳填的!</p>
+
+            <!-- 玩家名字 -->
+            <input
+            type="text"
+            id="player-name-input"
+            placeholder="例如：藍雲"
+            maxlength="9">
+
+
+            <!-- 開始遊戲按鈕 -->
+            <button id="start-screen-button">
+                踏入江湖
+            </button>
+
+            <p class="start-footer">人生吶不能放過我這次...</p>
+
+        </div>
+
+    </div>
+    <!-- ==================== 小關畫面 ==================== -->
+    <div class="game-screen" hidden>
+
+        <!-- 左側：玩家與關卡狀態欄 -->
+        <aside class="status-panel">
+
+            <!-- 玩家狀態 -->
+            <section class="player-status">
+
+                <p class="panel-heading">俠客資料</p>
+
+                <p class="status-panel-name">無名</p>
+
+                <!-- HP 數值 -->
+                <div class="status-info">
+                    <span>HP</span>
+                    <span class="hpText">100 / 100</span>
+                </div>
+
+                <!-- HP 長條 -->
+                <div class="hp-bar">
+                    <div class="hp-fill"></div>
+                </div>
+
+                <!-- 攻擊與防禦 -->
+                <p class="status-atk-def">
+                    ATK：<span class="atk">10</span>
+                    <br>
+                    DEF：<span class="def">10</span>
+                </p>
+
+            </section>
+
+
+            <!-- 關卡狀態 -->
+            <section class="level-status">
+
+                <p class="panel-heading">江湖行程</p>
+
+                <p class="status-panel-level">第一大關</p>
+
+                <div class="level-divider"></div>
+
+                <p>目前進度</p>
+                <p>
+                    第 <span class="current-level">1</span> / 10 小關
+                </p>
+
+                <p class="level-type">隨機事件</p>
+
+            </section>
+
+
+            <!-- 左側欄下方預留空間 -->
+            <div class="sidebar-empty">
+                <!-- 未來可以放其他資訊，例如提示或遊戲紀錄 -->
+            </div>
+
+        </aside>
+
+
+        <!-- 右側：主要遊戲區 -->
+        <main class="main-panel">
+
+            <!-- 場景展示區：預留圖片空間 -->
+            <section class="scene-panel">
+
+                <div class="scene-placeholder">
+                    <p>江湖場景</p>
+                    <span>此處預留給背景圖或人物立繪</span>
+                </div>
+
+            </section>
+
+
+            <!-- 事件操作區 -->
+            <section class="event-panel">
+
+                <!-- 事件標題 -->
+                <div class="event-header">
+                    <p class="panel-heading">江湖見聞</p>
+                </div>
+
+                <!-- 事件文字 -->
+                <div class="event-content">
+                    <p id="event-title">旅途開始</p>
+
+                    <p id="event-description">
+                        你背起行囊，踏入了這片風起雲湧的江湖。
+                    </p>
+                </div>
+
+                <!-- 事件選項：之後由 JavaScript 動態產生 -->
+                <div class="event-options" id="event-options">
+                    <div id="temp-option-button" hidden></div>
+                    <button id="next-level-button">繼續前行</button>
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+    <!-- ==================== 王關畫面 ==================== -->
+    <div class="boss-screen" hidden>
+        
+        <!-- 左側：玩家與關卡狀態欄 -->
+        <aside class="status-panel">
+
+            <!-- 玩家狀態 -->
+            <section class="player-status">
+
+                <p class="panel-heading">俠客資料</p>
+
+                <p class="status-panel-name">無名</p>
+
+                <!-- HP 數值 -->
+                <div class="status-info">
+                    <span>HP</span>
+                    <span class="hpText">100 / 100</span>
+                </div>
+
+                <!-- HP 長條 -->
+                <div class="hp-bar">
+                    <div class="hp-fill"></div>
+                </div>
+
+                <!-- 攻擊與防禦 -->
+                <p class="status-atk-def">
+                    ATK：<span class="atk">10</span>
+                    <br>
+                    DEF：<span class="def">10</span>
+                </p>
+
+            </section>
+
+            <!-- 王的狀態 -->
+            <section class="boss-status">
+                <p class="panel-heading">頭目資料</p>
+
+                <p id="boss-name">頭目名稱</p>
+
+                <div class="status-info">
+                    <span>HP</span>
+                    <span id="boss-hpText">200 / 200</span>
+                </div>
+
+                <div id="boss-hp-bar">
+                    <div id="boss-hp-fill"></div>
+                </div>
+
+                <p id="boss-atk-def">
+                    ATK：<span id="boss-atk">15</span>
+                    <br>
+                    DEF：<span id="boss-def">8</span>
+                </p>
+            </section>
+
+
+            <!-- 關卡狀態 -->
+            <section class="level-status">
+
+                <p class="panel-heading">Boss來襲</p>
+
+                <p class="status-panel-level">第一大關</p>
+
+                <div class="level-divider"></div>
+
+                <p>目前進度</p>
+                <p>
+                    第 <span class="current-level">10</span> / 10 小關
+                </p>
+
+                <p class="level-type">強敵警告</p>
+
+            </section>
+
+
+            <!-- 左側欄下方預留空間 -->
+            <div class="sidebar-empty">
+                <!-- 未來可以放其他資訊，例如提示或遊戲紀錄 -->
+            </div>
+
+        </aside>
+
+        <!-- 右側：王關主要區域 -->
+        <main class="main-panel">
+
+            <!-- 上方場景展示區 -->
+            <section class="scene-panel">
+
+                <div class="scene-placeholder">
+                    <p>王關場景</p>
+                    <span>此處預留給王的立繪或背景圖</span>
+                </div>
+
+            </section>
+
+            <!-- 下方戰鬥操作區 -->
+            <section class="boss-battle-panel">
+
+                <!-- 左側：戰鬥文字紀錄 -->
+                <section class="battle-log">
+
+                    <div class="event-header">
+                        <p class="panel-heading">戰鬥紀錄</p>
+                    </div>
+
+                    <div class="battle-log-content" id="battle-log-content">
+                        <!-- 戰鬥敘述由 JavaScript 動態加入 -->
+                    </div>
+
+                </section>
+
+                <!-- 右側：出拳操作 -->
+                <section class="battle-controls">
+
+                    <p class="panel-heading">選擇招式</p>
+
+                    <div class="battle-choice-buttons">
+
+                        <button id="rock" class="battle-choice-button">
+                            ✊
+                            <span>石頭</span>
+                        </button>
+
+                        <button id="scissors" class="battle-choice-button">
+                            ✌️
+                            <span>剪刀</span>
+                        </button>
+
+                        <button id="paper" class="battle-choice-button">
+                            ✋
+                            <span>布</span>
+                        </button>
+                        <button id="battle-next-button" class="battle-choice-button" hidden>
+                            ➡️
+                            <span>繼續</span>
+                        </button>
+
+                    </div>
+
+                </section>
+
+            </section>
+
+        </main>
+
+    </div>
+<script src="js/data.js"></script>
+<script src="js/boss.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
