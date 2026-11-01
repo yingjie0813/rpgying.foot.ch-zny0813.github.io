@@ -48,6 +48,16 @@ const panel_heading = document.querySelector(".battle-controls .panel-heading");
 
 
 /* ==================== 玩家面板 ==================== */
+/*彩蛋設定*/
+function egg(){
+    if(playerData.name === "蛋中小煥"){
+        playerData.maxHp += 1000;
+        playerData.hp += 1000;
+        playerData.atk += 1000;
+        playerData.def += 1000;
+        alert("劍王來了!")
+    };
+};
 
 /*初始化玩家數值*/
 function initial_status_data(){
@@ -573,6 +583,7 @@ function start_game() {
     document.querySelector("#temp-option-button").hidden = true;
     next_level_button.textContent = "繼續前行";
     next_level_button.hidden = false;
+    egg();
 
     update_status_panel(game_screen);
     update_level_status(game_screen);

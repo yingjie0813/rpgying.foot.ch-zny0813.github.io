@@ -82,7 +82,7 @@ const eventData = [
             {
                 text: "扶她過馬路",
                 result: "想不到老奶奶竟然是隱藏的富豪！她送了你一顆強身健體的靈丹。",
-                effect: { maxHp: 5, hp: 10, atk: 0, def: 0 }
+                effect: { maxHp: 5, hp: 10, atk: 2, def: 0 }
             },
             {
                 text: "綁架老奶奶",
@@ -107,7 +107,7 @@ const eventData = [
                 「那接下來，誰被我逮到也是你們的造化！」
                 <br>
                 震怒的阿菜嬤拿掃帚一揮，打中了比較衰的你！`,
-                effect: { maxHp: 0, hp: -10, atk: 0, def: 0 }
+                effect: { maxHp: 0, hp: -10, atk: 0, def: -1 }
             },
             {
                 text: "我要威脅他",
@@ -116,7 +116,7 @@ const eventData = [
                 沈非冷笑：「既然施主不肯聽勸，小僧亦無須再言。」
                 <br>
                 最終，你狼狽地逃離現場，雖然身受重傷，但你在被單方面毆打的過程中領悟了武學真理！`,
-                effect: { maxHp: 0, hp: -20, atk: 2, def: 0 }
+                effect: { maxHp: 0, hp: -20, atk: 5, def: 0 }
             },
             {
                 text: "必須制止他",
@@ -129,7 +129,7 @@ const eventData = [
                 「施主，這是速食，沒問題的。」
                 <br>
                 吃完炸雞，你感覺精神與體力都更好了。`,
-                effect: { maxHp: 5, hp: 10, atk: 0, def: 0 }
+                effect: { maxHp: 5, hp: 10, atk: 0, def: 1 }
             },
             {
                 text: "先去古佛寺",
@@ -138,7 +138,7 @@ const eventData = [
                 抵達後，你悄悄繞過某隻偷懶的掃地狐狸，面對難以獨力搬運的金佛，你決定用刀刮一點金箔下來，最終成功偷到了200元！
                 <br>
                 不過搬運金箔也讓你消耗了不少體力。`,
-                effect: { maxHp: 0, hp: -5, atk: 1, def: 0 }
+                effect: { maxHp: 5, hp: -5, atk: 1, def: 0 }
             }
         ]
     },
@@ -160,7 +160,7 @@ const eventData = [
             {
                 text: "溫柔安慰並且摘下果子",
                 result: "鴨鴨開心地蹭了蹭你，用著閃閃發亮的眼睛看著你：「謝謝尼！窩還想要那邊的梨子，還有那邊的...」<br>你雖然有點累，但心情變好了。",
-                effect: { maxHp: 5, hp: 10, atk: 0, def: 0 }
+                effect: { maxHp: 5, hp: 10, atk: 0, def: 3 }
             }
         ]
     },
@@ -174,12 +174,12 @@ const eventData = [
             {
                 text: "花錢求籤",
                 result: "算命先生摸了摸鬍子，送你一本武學心得。你似乎對戰鬥有了新的領悟。",
-                effect: { maxHp: 0, hp: -5, atk: 2, def: 0 }
+                effect: { maxHp: 0, hp: 0, atk: 2, def: 0 }
             },
             {
                 text: "請他吃飯",
                 result: "算命先生感動不已，決定傳授你一套防身心法。",
-                effect: { maxHp: 0, hp: -5, atk: 0, def: 2 }
+                effect: { maxHp: 0, hp: 0, atk: 0, def: 5 }
             },
             {
                 text: "直接逃跑",
@@ -196,17 +196,17 @@ const eventData = [
             {
                 text: "報名參賽",
                 result: "你一路過關斬將，雖然最後落敗，但在高手的指點下，攻擊技巧大幅進步。",
-                effect: { maxHp: 0, hp: -15, atk: 3, def: 0 }
+                effect: { maxHp: 0, hp: -15, atk: 5, def: 0 }
             },
             {
                 text: "觀摩高手過招",
                 result: "你仔細觀察每個人的出招與防守，逐漸掌握了防禦的訣竅。",
-                effect: { maxHp: 0, hp: 0, atk: 0, def: 2 }
+                effect: { maxHp: 0, hp: 0, atk: 0, def: 3 }
             },
             {
                 text: "偷偷混進貴賓席",
                 result: "你吃了不少免費點心，還順手拿走一瓶補氣藥酒。",
-                effect: { maxHp: 5, hp: 10, atk: 0, def: 0 }
+                effect: { maxHp: 5, hp: 30, atk: 1, def: 0 }
             }
         ]
     },
@@ -218,17 +218,17 @@ const eventData = [
             {
                 text: "幫忙帶路",
                 result: "商隊順利抵達目的地，領隊感激地送你一些珍貴藥材。",
-                effect: { maxHp: 5, hp: 15, atk: 0, def: 0 }
+                effect: { maxHp: 5, hp: 20, atk: 0, def: 0 }
             },
             {
                 text: "收取帶路費",
                 result: "你成功賺了一筆，但領隊認為你獅子大開口，臨走前狠狠推了你一把。",
-                effect: { maxHp: 0, hp: -5, atk: 0, def: 1 }
+                effect: { maxHp: 0, hp: -5, atk: 0, def: 2 }
             },
             {
                 text: "趁亂偷東西",
                 result: "你趁商隊忙亂時摸走了一本武學秘籍，卻被護衛發現，狼狽逃走。",
-                effect: { maxHp: 0, hp: -15, atk: 2, def: 0 }
+                effect: { maxHp: 0, hp: -15, atk: 3, def: 0 }
             }
         ]
     },
@@ -240,7 +240,7 @@ const eventData = [
             {
                 text: "冒險攀爬",
                 result: "你成功取得寶箱，裡面竟然有一顆珍貴的強身丹！",
-                effect: { maxHp: 10, hp: 5, atk: 0, def: 0 }
+                effect: { maxHp: 10, hp: 5, atk: 3, def: 0 }
             },
             {
                 text: "用石頭敲開",
@@ -250,7 +250,7 @@ const eventData = [
             {
                 text: "放棄離開",
                 result: "你覺得小命比較重要，於是頭也不回地離開。安全第一！",
-                effect: { maxHp: 0, hp: 5, atk: 0, def: 0 }
+                effect: { maxHp: 0, hp: 15, atk: 0, def: 0 }
             }
         ]
     },
@@ -262,12 +262,12 @@ const eventData = [
             {
                 text: "出面勸架",
                 result: "兩人不但沒有打起來，還對你的勇氣表示敬佩，並傳授你一些防身技巧。",
-                effect: { maxHp: 0, hp: -5, atk: 1, def: 1 }
+                effect: { maxHp: 0, hp: -5, atk: 2, def: 2 }
             },
             {
                 text: "加入混戰",
                 result: "你莫名其妙成了眾人的共同敵人，最後被打得鼻青臉腫，卻也在混戰中學會了幾招。",
-                effect: { maxHp: 0, hp: -20, atk: 2, def: 0 }
+                effect: { maxHp: 10, hp: -20, atk: 5, def: 0 }
             },
             {
                 text: "趁亂吃免費點心",
@@ -284,7 +284,7 @@ const eventData = [
             {
                 text: "幫狐狸包紮",
                 result: "小狐狸感激地舔了舔你的手，隨後帶你找到一處靈泉。",
-                effect: { maxHp: 5, hp: 15, atk: 0, def: 0 }
+                effect: { maxHp: 5, hp: 35, atk: 0, def: 0 }
             },
             {
                 text: "拿走狐狸的食物",
@@ -383,6 +383,107 @@ const eventData = [
                 text: "請教養生之道",
                 result: "老者教你調整呼吸、調養身體。雖然沒有學到什麼厲害招式，但身體健康才是最重要的。",
                 effect: { maxHp: 10, hp: 15, atk: 0, def: 0 }
+            }
+        ]
+    },
+    {/* 16. 蟲新潮流 */
+        title: "蟲新潮流",
+        description: "那是一處橙子園，漫山遍野花花綠綠、歡聲笑語，好不快災。你會?",
+        options: [
+            {
+                text: "加入黑水刀客",
+                result: "和段天成一起舞刀擊劍，你一個橫掃。<br>段天成:「小心，那是!」<br>被橫掃到的毛毛蟲爆汁了，是普通的...好像兩個差不多。",
+                effect: { maxHp: 10, hp: 10, atk: 3, def: -5 }
+            },
+            {
+                text: "加入鴨梨衫大",
+                result: "你套上了一件又一件的衣服，「衫大!」",
+                effect: { maxHp: 0, hp: 0, atk: 0, def: 6 }
+            },
+            {
+                text: "加入非橙勿擾",
+                result: "就叫你勿擾，看電影也記得關聲音呦。<br>後排座位上好像有甚麼眨了一下眼:「(ゝω・)☆」",
+                effect: { maxHp: 0, hp: 0, atk: 0, def: 0 }
+            }
+        ]
+    },
+
+    {/* 17. 你的丹爐被人偷吃了 */
+        title: "你的丹爐被人偷吃了!",
+        description: "你打開丹爐，發現一個不認識的人吃了你的丹爐！",
+        options: [
+            {
+                text: "相信他說：「我沒偷！」",
+                result: "恭喜你成為睜眼瞎子！",
+                effect: { maxHp: -10, hp: 0, atk: 0, def: 0 }
+            },
+            {
+                text: "扶她過馬路",
+                result: "祝他喝水嗆到，上廁所沒紙。",
+                effect: { maxHp: 0, hp: 0, atk: 5, def: 0 }
+            },
+            {
+                text: "爆破他",
+                result: "他把仙丹還給你了，但他說不是他做的，他不會認的。",
+                effect: { maxHp: 10, hp: 50, atk: 0, def: 0 }
+            }
+        ]
+    },
+
+    {/* 18. 雨靜在市集路倒了 */
+        title: "雨靜在市集路倒了!",
+        description: "你在市集水裡，看見昏迷不醒的雨靜！",
+        options: [
+            {
+                text: "吻他",
+                result: "雨靜其實一直醒著，但他希望你多親幾下。",
+                effect: { maxHp: 10, hp: 10, atk: 10, def: 10 }
+            },
+            {
+                text: "叫捕快",
+                result: "雨靜睡醒回神，發現自己身在衙門，吃了好幾口難吃的食物。",
+                effect: { maxHp: 0, hp: 50, atk: 0, def: 0 }
+            },
+            {
+                text: "習以為常",
+                result: "雨靜從小睡到大，他會好好活著的，不用擔心。",
+                effect: { maxHp: 10, hp: 0, atk: 0, def: 5 }
+            },
+            {
+                text: "輕輕敲醒他沉睡的心靈",
+                result: "要敲他嗎？用榔頭吧！這個好使！",
+                effect: { maxHp: 0, hp: 0, atk: 10, def: 0 }
+            },
+            {
+                text: "幫他蓋被子",
+                result: "雨靜一腳把被子踢開，你決定用麻繩把他捆起來！",
+                effect: { maxHp: 0, hp: 0, atk: 3, def: 3 }
+            }
+        ]
+    },
+    {/* 19. 《江湖第一攻》 */
+        title: "《江湖第一攻》!",
+        description: "誰才是江湖最帥氣、最攻、最英俊瀟灑風流倜儻的人呢？",
+        options: [
+            {
+                text: "聿縭",
+                result: "你非常有眼光，獲得了老虎的肯定！",
+                effect: { maxHp: 10, hp: 100, atk: 10, def: 10 }
+            },
+            {
+                text: "打工仔",
+                result: "確定嗎？你再想想。",
+                effect: { maxHp: 0, hp: 0, atk: -5, def: 0 }
+            },
+            {
+                text: "江南一朵嘎",
+                result: "我們嘎總當然攻！",
+                effect: { maxHp: 0, hp: 0, atk: 10, def: 0 }
+            },
+            {
+                text: "葉詭",
+                result: "小葉子受！",
+                effect: { maxHp: 0, hp: 0, atk: 0, def: -5 }
             }
         ]
     }
