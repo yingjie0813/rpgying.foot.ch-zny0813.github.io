@@ -183,7 +183,7 @@
     /* =====================================================================
        4. 事件結果:「| 生命 +10 |」→ 小徽章(顯示的字完全相同,只是換成徽章外觀)
        ===================================================================== */
-    const STAT_RE = /\|\s*(最大生命|生命|攻擊|防禦)\s+([+-]\d+)\s*\|/g;
+    const STAT_RE = /\|\s*(最大生命|生命|攻擊|防禦)\s+([+-]\d+%?)\s*\|/g;
     function chipify(){
       const d = $('#event-description');
       if(!d){ return; }
@@ -236,6 +236,14 @@
     }
     function resetVS(){ setPl('me', null); setPl('foe', null); setVerdict('', ''); }
 
+    // 頭目這回合招式的「名稱」(bossData 招式裡的 名稱 欄位);沒填就回傳空字串
+    function foeMoveName(b, h){
+      try{
+        const move = b['招式'][bossChoice[0]][bossChoice[1]];
+        return (move && typeof move['名稱'] === 'string') ? move['名稱'].replace(/\{name\}/g, h.name).trim() : '';
+      }catch(e){ return ''; }
+    }
+
     let lastKey = '', snap = null, uid = 0;
     const ids = new WeakMap();
     const bossId = o => { if(!ids.has(o)){ ids.set(o, ++uid); } return ids.get(o); };
@@ -256,21 +264,25 @@
       lastKey = key;
 
       const flow = battle_flow;
-      if(ph === flow[0] || ph === flow[1]){
+      if(ph === flow[0]){
         resetVS();
+      }else if(ph === flow[1]){
+        // 頭目出現預兆、玩家選拳:招式名稱有填就先顯示出來(出拳仍保持「？」,不洩漏)
+        resetVS();
+        const nm = foeMoveName(b, h);
+        if(nm){ $('#mv-foe').textContent = nm; }
       }else if(ph === flow[2]){
         // 玩家已出拳,頭目出招中(此時不洩漏頭目出的是哪一拳)
         setPl('me', MOVE[playerChoice]);
         setPl('foe', null, 'shake');
         try{
-          const move = b['招式'][bossChoice[0]][bossChoice[1]];
           // 招式有填「名稱」就直接顯示名稱;沒填(空字串或沒有此欄位)就維持原本的顯示方式:
           // 招式文字有時是短短的招式名稱、有時是一整句敘述;只有夠短時才顯示在面板上,完整文字仍在戰鬥紀錄裡
-          const nm = (move && typeof move['名稱'] === 'string') ? move['名稱'].replace(/\{name\}/g, h.name).trim() : '';
+          const nm = foeMoveName(b, h);
           if(nm){
             $('#mv-foe').textContent = nm;
           }else{
-            const mv = String(move['攻擊'])
+            const mv = String(b['招式'][bossChoice[0]][bossChoice[1]]['攻擊'])
               .replace(/\{name\}/g, h.name)
               .split(/<br\s*\/?>/i).map(t => t.replace(/<[^>]*>/g, '').trim()).filter(Boolean)[0] || '';
             $('#mv-foe').textContent = (mv && Array.from(mv).length <= 14) ? mv : '出招中…';

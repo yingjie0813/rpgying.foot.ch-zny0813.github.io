@@ -199,18 +199,26 @@ function show_small_options(){
         new_button.classList.add("choice-button");
         new_button.addEventListener("click", function(){
             const keys = Object.keys(option.effect);
+            /*hpPct：以「套用本選項前」的最大生命為基準的百分比，回血／扣血都無條件進位（至少 1 點）*/
+            const base_maxHp = playerData.maxHp;
             for(let i=0; i<keys.length; i++){
-                playerData[keys[i]] += option.effect[keys[i]];
+                if(keys[i] === "hpPct"){
+                    const pct = option.effect.hpPct;
+                    const amount = Math.ceil(base_maxHp * Math.abs(pct) / 100);
+                    playerData.hp += pct < 0 ? -amount : amount;
+                }else{
+                    playerData[keys[i]] += option.effect[keys[i]];
+                };
             }; 
             update_status_panel(game_screen);
             temp_option_button.innerHTML = "";
-            const stat_names = { maxHp: "最大生命", hp: "生命", atk: "攻擊", def: "防禦" };
+            const stat_names = { maxHp: "最大生命", hp: "生命", hpPct: "生命", atk: "攻擊", def: "防禦" };
             let temp_text ="";
             temp_text += `${option.result}<br><br>`;
             for(let i=0; i<keys.length; i++){
                 const v = option.effect[keys[i]];
                 if(v === 0){ continue; };
-                temp_text += `| ${stat_names[keys[i]] || keys[i]} ${v > 0 ? "+" : ""}${v} |`;
+                temp_text += `| ${stat_names[keys[i]] || keys[i]} ${v > 0 ? "+" : ""}${v}${keys[i] === "hpPct" ? "%" : ""} |`;
             };
             if(playerData.hp <= 0){
                 temp_text += `<br><br>你再也撐不住，倒在了江湖路上……`;
@@ -750,6 +758,25 @@ function clear_image(scene){
 start_screen_button.addEventListener("click", start_game);
 document.querySelector("#player-name-input").addEventListener("keydown", function(e){
     if(e.key === "Enter"){ start_game(); };
+});
+
+/*骰子按鈕：從人物誌對照表（portraits.js）純隨機抽一個名字填進輸入框（可能重複）*/
+const random_name_button = document.querySelector("#random-name-button");
+random_name_button.addEventListener("click", function(){
+    const input = document.querySelector("#player-name-input");
+    const max_len = Number(input.getAttribute("maxlength")) || 9;
+    const names = Object.keys(window.PORTRAITS || {}).filter(function(name){
+        return Array.from(name).length <= max_len;
+    });
+    if(names.length === 0){ return; };
+    input.value = names[Math.floor(Math.random() * names.length)];
+    /*小動畫：重新觸發旋轉*/
+    random_name_button.classList.remove("rolling");
+    void random_name_button.offsetWidth;
+    random_name_button.classList.add("rolling");
+});
+random_name_button.addEventListener("animationend", function(){
+    random_name_button.classList.remove("rolling");
 });
 
 /*點擊繼續前進按鈕函數與執行*/

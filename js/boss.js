@@ -662,7 +662,7 @@ const bossData = [
         `,
         maxHp: 50,
         hp: 50,
-        atk: 30,
+        atk: 50,
         def: 5,
 
         img: "https://www.vw.idv.tw/vwpicstore/2462.jpeg?2026/11/2%20%A4U%A4%C8%2008:55:52",
