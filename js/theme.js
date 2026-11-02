@@ -110,20 +110,26 @@
         if(!name){ return; }
         const seal = () => A.sealEmblem(Array.from(name)[0], hash(name) % 9);
         if(!img){ slot.innerHTML = seal(); return; }
-        // 先顯示印章,圖片載入成功後再換成圖片(載入失敗就維持印章)
+        // 先顯示印章,圖片載入成功後再換成圖片(載入失敗就試備用圖,全部失敗就維持印章)
         slot.innerHTML = seal();
-        const im = new Image();
-        im.alt = '';
-        im.referrerPolicy = 'no-referrer';
-        im.onload = () => {
-          if(slot.dataset.k !== k){ return; }
-          const box = document.createElement('div');
-          box.className = 'portrait';
-          box.appendChild(im);
-          slot.innerHTML = '';
-          slot.appendChild(box);
+        const urls = [img].concat(Array.isArray(src.imgAlts) ? src.imgAlts.map(u => String(u).trim()).filter(Boolean) : []);
+        const tryLoad = (i) => {
+          if(i >= urls.length){ return; }
+          const im = new Image();
+          im.alt = '';
+          im.referrerPolicy = 'no-referrer';
+          im.onload = () => {
+            if(slot.dataset.k !== k){ return; }
+            const box = document.createElement('div');
+            box.className = 'portrait';
+            box.appendChild(im);
+            slot.innerHTML = '';
+            slot.appendChild(box);
+          };
+          im.onerror = () => { if(slot.dataset.k === k){ tryLoad(i + 1); } };
+          im.src = urls[i];
         };
-        im.src = img;
+        tryLoad(0);
       });
     }
 

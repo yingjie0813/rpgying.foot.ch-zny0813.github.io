@@ -357,8 +357,8 @@ input:focus-visible{ outline:2px solid var(--gold-hi); outline-offset:3px; }
   overflow-wrap:anywhere;
   line-height:1.25;
 }
-.player-status:not(:has(.emblem)) .status-panel-name,
-.boss-status:not(:has(.emblem)) #boss-name{ grid-column:1 / -1; margin-bottom:8px; }
+.player-status:not(:has(.emblem)):not(:has(.portrait)) .status-panel-name,
+.boss-status:not(:has(.emblem)):not(:has(.portrait)) #boss-name{ grid-column:1 / -1; margin-bottom:8px; }
 
 /* HP 資訊列 */
 .status-info{

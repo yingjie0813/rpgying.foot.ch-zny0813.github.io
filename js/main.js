@@ -51,6 +51,22 @@ function fmt(text){
 function calc_dmg(atk, def){
     return Math.max(1, Math.round(atk * 100 / (100 + def * 5)));
 };
+/* ==================== 頭像功能 ==================== */
+/*角色已經有 img 網址就沿用；沒有的話用名字查人物誌對照表（portraits.js）。
+  對照表裡同一角色有多張圖時，隨機抽一張放進 img，其餘放進 imgAlts 當備用
+  （抽中的圖載入失敗時，畫面會自動改用備用圖）。
+  查不到就維持空字串，畫面會退回印章頭像。查到後呼叫 refresh 重畫畫面。*/
+function apply_portrait(person, refresh){
+    if(!person || person.img || typeof findPortraits !== "function"){ return; };
+    const name = person.name;
+    findPortraits(name).then(function(list){
+        if(!list.length || person.name !== name || person.img){ return; };
+        const pick = Math.floor(Math.random() * list.length);
+        person.img = list[pick];
+        person.imgAlts = list.filter(function(_, i){ return i !== pick; });
+        if(typeof refresh === "function"){ refresh(); };
+    }).catch(function(){});
+};
 
 /*下一步和猜拳按鈕*/
 const choice_buttons = document.querySelectorAll(".battle-choice-buttons .battle-choice-button:not(#battle-next-button)");
@@ -498,6 +514,7 @@ function start_boss_event(){
     boss_screen.hidden = false;
     /*選擇boss*/
     current_boss = random_boss();
+    apply_portrait(current_boss, function(){ update_boss_status(boss_screen); });
     /*更新畫面數據*/
     update_boss_status(boss_screen);
     update_status_panel(boss_screen);
@@ -635,6 +652,8 @@ function start_game() {
     const player_name=document.querySelector("#player-name-input").value.trim();
 
     playerData.name = player_name || initial_playerData.name;
+    playerData.imgAlts = [];
+    apply_portrait(playerData, function(){ update_status_panel(game_screen); update_status_panel(boss_screen); });
 
     /*重置事件面板與狀態（重新開始時避免殘留上一局內容）*/
     game_cleared = false;
