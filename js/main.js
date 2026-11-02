@@ -49,7 +49,7 @@ function fmt(text){
 
 /*傷害公式：攻擊越高越痛，防禦遞減式減傷，至少 1*/
 function calc_dmg(atk, def){
-    return Math.max(1, Math.round(atk * 100 / (100 + def * 5)));
+    return Math.max(1, Math.round(atk * 100 / (100 + def*0.5)- (def*0.5)));
 };
 /* ==================== 頭像功能 ==================== */
 /*角色已經有 img 網址就沿用；沒有的話用名字查人物誌對照表（portraits.js）。
@@ -78,10 +78,10 @@ const panel_heading = document.querySelector(".battle-controls .panel-heading");
 /*彩蛋設定*/
 function egg(){
     if(playerData.name === "蛋中小煥"){
-        playerData.maxHp += 1000;
-        playerData.hp += 1000;
-        playerData.atk += 1000;
-        playerData.def += 1000;
+        playerData.maxHp = 896;
+        playerData.hp = 896;
+        playerData.atk = 223;
+        playerData.def = 114;
         alert("劍王來了!")
     };
 };
@@ -253,7 +253,7 @@ function boss_power_scale(boss, majorLevel){
 
     // 計算成長倍率
     const hpMultiplier = 1 + n * 1.2;
-    const atkMultiplier = 1 + n * 0.5 + n * n * 0.2;
+    const atkMultiplier = 1 + n * 0.5 + n * n * 0.1;
     const defMultiplier = 1 + n * 0.6;
 
     // 難度倍率
@@ -402,19 +402,9 @@ function calculate_damage(){
         let playerDamage = calc_dmg(playerData.atk, current_boss.def);
         let bossDamage = calc_dmg(current_boss.atk, playerData.def);
 
-        if(playerDamage > bossDamage){
-            current_boss.hp -= playerDamage;
-
-            battle_log = `雙方平手，但${playerData.name}攻勢較強！${playerData.name}對 ${current_boss.name} 造成了 ${playerDamage} 點傷害！`;
-
-        }else if(playerDamage < bossDamage){
-            playerData.hp -= bossDamage;
-
-            battle_log = `雙方平手，但 ${current_boss.name} 攻勢較強！${current_boss.name} 對${playerData.name}造成了 ${bossDamage} 點傷害！`;
-
-        }else{
-            battle_log = `雙方平手，攻防勢均力敵，沒有任何一方受到傷害！`;
-        }
+        current_boss.hp -= playerDamage;
+        playerData.hp -= bossDamage;
+        battle_log = `雙方平手，${playerData.name}對 ${current_boss.name} 造成了 ${playerDamage} 點傷害！<br>${current_boss.name} 對${playerData.name}造成了 ${bossDamage} 點傷害！`;
     }
 
     // 玩家落敗：Boss 攻擊玩家
