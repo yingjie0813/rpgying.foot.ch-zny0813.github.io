@@ -814,7 +814,7 @@ const bossData = [
         hp: 80,
         atk: 15,
         def: 24,
-        img: "(https://www.vw.idv.tw/vwpic/17645.jpeg?2026/11/3%20%A4U%A4%C8%2001:18:53)",
+        img: "https://www.vw.idv.tw/vwpic/17645.jpeg?2026/11/3%20%A4U%A4%C8%2001:18:53",
         victoryDescription: `和煦捂著受傷的肩頭，踉蹌幾步後坐倒在地。摺扇落在身旁，幾片金桂沾上了衣襟上的血跡。她抬手擦去唇邊血跡，望著滿地散落的桂花，忍不住輕笑一聲。<br>
     「哎呀……這回玩得有些過火了。」<br>
     她抬起頭，朝{name}眨了眨眼。<br>
