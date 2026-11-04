@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#150e0c">
+    <title>江湖RPG|野球外傳</title>
+
+    <!-- 字型(同遊戲A):毛筆 Yuji Boku、文楷 LXGW WenKai TC、宋體 Noto Serif TC。離線時自動退回系統字型 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Noto+Serif+TC:wght@500;700;900&family=Yuji+Boku&display=swap">
+
+    <link rel="stylesheet" href="css/ornaments.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/story.css">
+</head>
+
+<body>
+
+    <!-- ==================== 視覺裝飾層(純裝飾,與遊戲邏輯無關) ==================== -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+        <filter id="rough" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".06" numOctaves="2" seed="3" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="3"/></filter>
+    </svg>
+    <div class="bg" id="bg" aria-hidden="true"></div>
+    <div class="vig" aria-hidden="true"></div>
+    <div class="petals" id="petals" aria-hidden="true"></div>
+
+    <!-- ==================== 開始畫面 ==================== -->
+    <div class="start-screen">
+
+        <div class="start-card">
+
+            <!-- 遊戲標題 -->
+            <p class="start-subtitle">你是個學野球拳的人!</p>
+            <h1 id="start-screen-title">江湖RPG|外傳</h1>
+            <p id="start-screen-p">數值用腳填的!</p>
+
+            <!-- 玩家名字 -->
+            <div class="namebox">
+                <input
+                type="text"
+                id="player-name-input"
+                placeholder="例如：藍雲"
+                maxlength="9">
+                <!-- 隨機取名:從人物誌對照表(portraits.js)抽一個名字 -->
+                <button type="button" id="random-name-button" class="dice-button" title="隨機抽取名字" aria-label="隨機抽取名字">
+                    <svg viewBox="4 4 36 36" aria-hidden="true" focusable="false">
+                        <rect x="8" y="8" width="28" height="28" rx="5"/>
+                        <circle cx="16" cy="16" r="2.4"/><circle cx="28" cy="16" r="2.4"/><circle cx="22" cy="22" r="2.4"/>
+                        <circle cx="16" cy="28" r="2.4"/><circle cx="28" cy="28" r="2.4"/>
+                    </svg>
+                </button>
+            </div>
+
+
+            <!-- 難度選擇(卡片文字由 data.js 的 difficulty_config 帶入;無盡需先通關一次) -->
+            <div class="difficulty-group" role="radiogroup" aria-label="難度">
+                <button type="button" class="difficulty-card" data-diff="story" role="radio" aria-checked="false">
+                    <span class="difficulty-art" aria-hidden="true"></span>
+                    <span class="difficulty-flag" aria-hidden="true">故</span>
+                    <span class="difficulty-name">故事</span>
+                    <span class="difficulty-desc"></span>
+                </button>
+                <button type="button" class="difficulty-card" data-diff="easy" role="radio" aria-checked="false">
+                    <span class="difficulty-art" aria-hidden="true"></span>
+                    <span class="difficulty-flag" aria-hidden="true">簡</span>
+                    <span class="difficulty-name">簡單</span>
+                    <span class="difficulty-desc"></span>
+                </button>
+                <button type="button" class="difficulty-card" data-diff="normal" role="radio" aria-checked="true">
+                    <span class="difficulty-art" aria-hidden="true"></span>
+                    <span class="difficulty-flag" aria-hidden="true">普</span>
+                    <span class="difficulty-name">普通</span>
+                    <span class="difficulty-desc"></span>
+                </button>
+                <button type="button" class="difficulty-card" data-diff="hard" role="radio" aria-checked="false">
+                    <span class="difficulty-art" aria-hidden="true"></span>
+                    <span class="difficulty-flag" aria-hidden="true">難</span>
+                    <span class="difficulty-name">困難</span>
+                    <span class="difficulty-desc"></span>
+                </button>
+                <button type="button" class="difficulty-card" data-diff="endless" role="radio" aria-checked="false">
+                    <span class="difficulty-art" aria-hidden="true"></span>
+                    <span class="difficulty-flag" aria-hidden="true">無</span>
+                    <span class="difficulty-name">無盡</span>
+                    <span class="difficulty-desc"></span>
+                </button>
+            </div>
+
+            <!-- 開始遊戲按鈕 -->
+            <button id="start-screen-button">
+                踏入江湖
+            </button>
+
+            <p class="start-footer">人生吶不能放過我這次...</p>
+
+        </div>
+
+    </div>
+    <!-- ==================== 小關畫面 ==================== -->
+    <div class="game-screen" hidden>
+
+        <!-- 左側：玩家與關卡狀態欄 -->
+        <aside class="status-panel">
+
+            <!-- 玩家狀態 -->
+            <section class="player-status">
+
+                <p class="panel-heading">俠客資料</p>
+
+                <div class="emblem-slot" data-who="me" aria-hidden="true"></div>
+
+                <p class="status-panel-name">無名</p>
+
+                <!-- HP 數值 -->
+                <div class="status-info">
+                    <span>HP</span>
+                    <span class="hpText">100 / 100</span>
+                </div>
+
+                <!-- HP 長條 -->
+                <div class="hp-bar">
+                    <div class="hp-fill"></div>
+                </div>
+
+                <!-- 攻擊與防禦 -->
+                <p class="status-atk-def">
+                    ATK：<span class="atk">10</span>
+                    <br>
+                    DEF：<span class="def">10</span>
+                </p>
+
+            </section>
+
+
+            <!-- 關卡狀態 -->
+            <section class="level-status">
+
+                <p class="panel-heading">江湖行程</p>
+
+                <p class="status-panel-level">第一大關</p>
+
+                <div class="level-divider"></div>
+
+                <p>目前進度</p>
+                <p>
+                    第 <span class="current-level">1</span> / 10 小關
+                </p>
+
+                <ol class="prog-nodes" aria-hidden="true"></ol>
+
+                <p class="level-type">隨機事件</p>
+
+            </section>
+
+
+            <!-- 左側欄下方預留空間 -->
+            <div class="sidebar-empty">
+                <!-- 未來可以放其他資訊，例如提示或遊戲紀錄 -->
+            </div>
+
+        </aside>
+
+
+        <!-- 右側：主要遊戲區 -->
+        <main class="main-panel">
+
+            <!-- 上方橫幅(由視覺腳本帶入大關名稱,純裝飾) -->
+            <div class="stage-banner" aria-hidden="true"></div>
+
+            <!-- 場景展示區：預留圖片空間 -->
+            <section class="scene-panel">
+
+                <div class="scene-placeholder">
+                    <div class="scene-default">
+                        <p>江湖場景</p>
+                        <span>此處預留給背景圖或人物立繪</span>
+                    </div>
+                </div>
+
+            </section>
+
+
+            <!-- 事件操作區 -->
+            <section class="event-panel">
+
+                <!-- 事件標題 -->
+                <div class="event-header">
+                    <p class="panel-heading">江湖見聞</p>
+                </div>
+
+                <!-- 事件文字 -->
+                <div class="event-content">
+                    <p id="event-title">旅途開始</p>
+
+                    <p id="event-description">
+                        你背起行囊，踏入了這片風起雲湧的江湖。
+                    </p>
+                </div>
+
+                <!-- 事件選項：之後由 JavaScript 動態產生 -->
+                <div class="event-options" id="event-options">
+                    <div id="temp-option-button" hidden></div>
+                    <button id="next-level-button">繼續前行</button>
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+    <!-- ==================== 故事模式畫面(版面沿用小關畫面;文字由 system/story-mode/story.js 帶入) ==================== -->
+    <div class="story-screen" hidden>
+
+        <!-- 章節名:置中、貼在畫面最上方(由程式帶入) -->
+        <div class="stage-banner" id="story-banner" aria-hidden="true"></div>
+
+        <!-- 左側：玩家資料 -->
+        <aside class="status-panel">
+
+            <!-- 玩家狀態 -->
+            <section class="player-status">
+
+                <p class="panel-heading">俠客資料</p>
+
+                <div class="emblem-slot" data-who="me" aria-hidden="true"></div>
+
+                <p class="status-panel-name">無名</p>
+
+                <!-- HP 數值 -->
+                <div class="status-info">
+                    <span>HP</span>
+                    <span class="hpText">100 / 100</span>
+                </div>
+
+                <!-- HP 長條 -->
+                <div class="hp-bar">
+                    <div class="hp-fill"></div>
+                </div>
+
+                <!-- 攻擊與防禦 -->
+                <p class="status-atk-def">
+                    ATK：<span class="atk">10</span>
+                    <br>
+                    DEF：<span class="def">10</span>
+                </p>
+
+            </section>
+
+
+            <div class="sidebar-empty">
+                <div class="story-tools">
+                    <button type="button" id="story-save-button">存檔</button>
+                    <button type="button" id="story-load-button">讀檔</button>
+                    <button type="button" id="story-exit-button">離開故事</button>
+                </div>
+                <p id="story-save-info" aria-live="polite"></p>
+            </div>
+
+        </aside>
+
+
+        <!-- 右側：故事主要區 -->
+        <main class="main-panel">
+
+            <!-- 上方:說話者資料(右)。版面與王關上方的「頭目資料」完全相同 -->
+            <div class="boss-top story-top">
+
+                <!-- 說話者資料:說話的是玩家時照「俠客資料」、其他角色照「頭目資料」。HP / ATK / DEF 只有角色資料有填才顯示 -->
+                <section class="boss-status story-speaker" id="story-speaker" hidden>
+                    <p class="panel-heading" id="story-speaker-heading">角色資料</p>
+
+                    <div class="emblem-slot" data-who="speaker" aria-hidden="true"></div>
+
+                    <p id="story-speaker-name"></p>
+
+                    <div class="status-info" id="story-speaker-hp-row">
+                        <span>HP</span>
+                        <span id="story-speaker-hp">0 / 0</span>
+                    </div>
+
+                    <div class="hp-bar" id="story-speaker-hp-bar">
+                        <div class="hp-fill" id="story-speaker-hp-fill"></div>
+                    </div>
+
+                    <p class="status-atk-def" id="story-speaker-atk-def">
+                        ATK：<span class="atk" id="story-speaker-atk">0</span>
+                        <br>
+                        DEF：<span class="def" id="story-speaker-def">0</span>
+                    </p>
+                </section>
+
+            </div>
+
+            <!-- 場景展示區:預留給之後的背景圖或立繪 -->
+            <section class="scene-panel">
+
+                <div class="scene-placeholder" id="story-scene"></div>
+
+            </section>
+
+
+        </main>
+
+
+        <!-- 對話區:橫跨整個畫面底部(沿用小關的卷軸面板)。左上角的小標顯示目前說話者的名字 -->
+        <section class="event-panel story-panel">
+
+            <div class="event-header">
+                <p class="panel-heading" id="story-panel-heading">故事</p>
+            </div>
+
+            <!-- 對話文字(逐字顯示,點一下可立刻顯示整句、再點一下進入下一句) -->
+            <div class="event-content" id="story-content">
+                <p id="story-text"></p>
+            </div>
+
+            <!-- 選項與繼續按鈕 -->
+            <div class="event-options">
+                <div id="story-options" hidden></div>
+                <button type="button" id="story-next-button">繼續</button>
+            </div>
+
+        </section>
+
+
+    </div>
+    <!-- ==================== 王關畫面 ==================== -->
+    <div class="boss-screen" hidden>
+
+        <!-- 關卡狀態(王關不再佔用側欄;元素保留供程式更新,畫面上方橫幅會顯示大關名稱) -->
+        <aside class="status-panel boss-level-aside">
+
+            <section class="level-status">
+
+                <p class="panel-heading">Boss來襲</p>
+
+                <p class="status-panel-level">第一大關</p>
+
+                <div class="level-divider"></div>
+
+                <p>目前進度</p>
+                <p>
+                    第 <span class="current-level">10</span> / 10 小關
+                </p>
+
+                <ol class="prog-nodes" aria-hidden="true"></ol>
+
+                <p class="level-type">強敵警告</p>
+
+            </section>
+
+        </aside>
+
+        <!-- 王關主要區域 -->
+        <main class="main-panel">
+
+            <!-- 上方:俠客資料(左)、橫幅(中)、頭目資料(右) -->
+            <div class="boss-top">
+
+                    <section class="player-status">
+
+                        <p class="panel-heading">俠客資料</p>
+
+                        <div class="emblem-slot" data-who="me" aria-hidden="true"></div>
+
+                        <p class="status-panel-name">無名</p>
+
+                        <!-- HP 數值 -->
+                        <div class="status-info">
+                            <span>HP</span>
+                            <span class="hpText">100 / 100</span>
+                        </div>
+
+                        <!-- HP 長條 -->
+                        <div class="hp-bar">
+                            <div class="hp-fill"></div>
+                        </div>
+
+                        <!-- 攻擊與防禦 -->
+                        <p class="status-atk-def">
+                            ATK：<span class="atk">10</span>
+                            <br>
+                            DEF：<span class="def">10</span>
+                        </p>
+
+                    </section>
+
+                <!-- 上方橫幅(由視覺腳本帶入大關名稱,純裝飾) -->
+                <div class="stage-banner" aria-hidden="true"></div>
+
+                    <section class="boss-status">
+                        <p class="panel-heading">頭目資料</p>
+
+                        <div class="emblem-slot" data-who="foe" aria-hidden="true"></div>
+
+                        <p id="boss-name">頭目名稱</p>
+
+                        <div class="status-info">
+                            <span>HP</span>
+                            <span id="boss-hpText">200 / 200</span>
+                        </div>
+
+                        <div id="boss-hp-bar">
+                            <div id="boss-hp-fill"></div>
+                        </div>
+
+                        <p id="boss-atk-def">
+                            ATK：<span id="boss-atk">15</span>
+                            <br>
+                            DEF：<span id="boss-def">8</span>
+                        </p>
+                    </section>
+
+            </div>
+
+            <!-- 上方場景展示區 -->
+            <section class="scene-panel">
+
+                <div class="scene-placeholder">
+                    <div class="scene-default">
+                        <p>王關場景</p>
+                        <span>此處預留給王的立繪或背景圖</span>
+                    </div>
+                </div>
+
+                <!-- 對戰面板(由視覺腳本依戰鬥狀態顯示出拳,純顯示) -->
+                <div class="vs-overlay" id="vs-overlay" aria-hidden="true"></div>
+
+            </section>
+
+            <!-- 下方戰鬥操作區 -->
+            <section class="boss-battle-panel">
+
+                <!-- 左側：戰鬥文字紀錄 -->
+                <section class="battle-log">
+
+                    <div class="event-header">
+                        <p class="panel-heading">戰鬥紀錄</p>
+                    </div>
+
+                    <div class="battle-log-content" id="battle-log-content">
+                        <!-- 戰鬥敘述由 JavaScript 動態加入 -->
+                    </div>
+
+                </section>
+
+                <!-- 右側：出拳操作 -->
+                <section class="battle-controls">
+
+                    <p class="panel-heading">選擇招式</p>
+
+                    <div class="battle-choice-buttons">
+
+                        <button id="rock" class="battle-choice-button" data-key="1">
+                            <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M10 44 L8 30 L18 14 L36 8 L54 18 L57 38 L46 54 L24 56Z" fill="#8b8479" stroke="#2a211c" stroke-width="3" stroke-linejoin="round"/><path d="M18 14 L26 28 L8 30 M26 28 L36 8 M26 28 L40 32 L54 18 M40 32 L46 54 M26 28 L24 56 M40 32 L57 38" fill="none" stroke="#2a211c" stroke-opacity=".55" stroke-width="2"/><path d="M20 18 L34 12 L30 22Z" fill="#fff" opacity=".35"/></svg>
+                            <span>石頭</span>
+                        </button>
+
+                        <button id="scissors" class="battle-choice-button" data-key="2">
+                            <svg viewBox="0 0 64 64" aria-hidden="true"><g stroke="#2a211c" stroke-width="2.5" stroke-linejoin="round"><path d="M30 34 L50 6 L54 10 L38 38Z" fill="#d6dbe0"/><path d="M34 34 L14 6 L10 10 L26 38Z" fill="#c4cad0"/></g><g fill="none" stroke="#c6872e" stroke-width="5"><circle cx="21" cy="48" r="8"/><circle cx="43" cy="48" r="8"/></g><circle cx="32" cy="35" r="3.4" fill="#2a211c"/></svg>
+                            <span>剪刀</span>
+                        </button>
+
+                        <button id="paper" class="battle-choice-button" data-key="3">
+                            <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M8 14 Q20 6 32 14 T56 14 V46 Q44 54 32 46 T8 46Z" fill="#e8dcc0" stroke="#2a211c" stroke-width="3" stroke-linejoin="round"/><path d="M20 12 V46 M32 14 V46 M44 12 V50" stroke="#2a211c" stroke-opacity=".3" stroke-width="2" fill="none"/><path d="M8 14 Q20 6 32 14 T56 14" fill="none" stroke="#a8291c" stroke-width="3"/></svg>
+                            <span>布</span>
+                        </button>
+                        <button id="battle-next-button" class="battle-choice-button" hidden>
+                            <svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 10 L22 22 L10 34 M22 10 L34 22 L22 34"/></svg>
+                            <span>繼續</span>
+                        </button>
+
+                    </div>
+
+                </section>
+
+            </section>
+
+        </main>
+
+    </div>
+    <!-- ==================== 結算畫面(通關或倒下之後) ==================== -->
+    <div class="result-screen" hidden data-kind="">
+        <section class="result-card">
+            <p class="result-kicker" id="result-kicker"></p>
+            <h1 id="result-title">江湖路盡</h1>
+            <p id="result-sub"></p>
+            <dl class="result-rows" id="result-rows"></dl>
+            <div class="result-bosses" id="result-bosses" hidden></div>
+            <div class="result-actions">
+                <button type="button" id="result-again-button">再來一局</button>
+                <button type="button" id="result-home-button">回到開始畫面</button>
+            </div>
+        </section>
+    </div>
+<!-- 程式進入點：ES 模組。請用 Live Server（或任何本機伺服器）開啟，直接雙擊 index.html 瀏覽器會擋住模組載入 -->
+<script type="module" src="main.js"></script>
+</body>
+</html>

@@ -1,0 +1,275 @@
+/* ==========================================================================
+   故事模式樣式
+   --------------------------------------------------------------------------
+   版面直接沿用小關畫面（左側欄 + 右側的橫幅 / 場景 / 卷軸面板），
+   所以大部分外觀已經由 style.css 的 .status-panel、.main-panel、.event-panel 等提供。
+   這個檔案只補「故事模式才有」的部分：
+     1. 故事畫面的外框（與小關畫面相同的排版）
+     2. 右上角的說話者資料（直接沿用王關的頭目資料面板外觀）
+     3. 對話文字（逐字顯示）與「還有下一句」的提示
+     4. 繼續按鈕、選項區、離開按鈕、章節結束字樣
+     5. 開始畫面多了第五張難度卡片「故事」的排版
+   ========================================================================== */
+
+
+/* ==================== 1. 故事畫面外框 ==================== */
+/* 桌面版：左欄（玩家資料）+ 右側主區在上，對話卷軸橫跨整個畫面底部從左到右；
+   章節名貼在畫面正中最上方。手機版改成直向堆疊（見最下方）。 */
+
+.story-screen{
+  position:absolute;
+  top:0;
+  left:0;
+  z-index:1;
+  width:100%;
+  height:100vh;
+  height:100dvh;
+
+  display:grid;
+  grid-template-columns:264px minmax(0,1fr);        /* 左欄寬度與 .status-panel 相同 */
+  grid-template-rows:minmax(0,1fr) auto;
+  column-gap:clamp(12px,1.6vw,22px);
+  row-gap:8px;
+  padding:clamp(10px,2vh,20px) max(16px,env(safe-area-inset-right,0px)) clamp(10px,2vh,20px) max(16px,env(safe-area-inset-left,0px));
+  overflow:hidden;
+}
+.story-screen[hidden]{ display:none; }
+
+.story-screen > .status-panel{ grid-column:1; grid-row:1; }
+.story-screen > .main-panel{ grid-column:2; grid-row:1; }
+.story-screen > .event-panel{ grid-column:1 / -1; grid-row:2; margin:8px 8px 10px; }
+
+/* 對話卷軸變寬了，但右邊的「繼續」／選項欄要維持原本（卷軸只在右側主區內時）的寬度：
+   原本卷軸寬 = 視窗寬 − 左欄 264 − 欄距 − 左右內距 32 − 卷軸外距 20，
+   右欄 = 內寬（扣掉卷軸內距與欄距）的 1/2.7（原 1.7fr : 1fr）。 */
+.story-panel{
+  --sp-gap:clamp(12px,1.6vw,22px);
+  --sp-pad:clamp(18px,2.2vw,32px);
+  --sp-col-gap:clamp(14px,2vw,30px);
+  --sp-orig:calc((100vw - 264px - var(--sp-gap) - 32px - 20px - 2 * var(--sp-pad) - var(--sp-col-gap)) / 2.7);
+  grid-template-columns:minmax(0,1fr) max(220px,var(--sp-orig));
+}
+
+/* 章節名：置中、貼在最上方 */
+.story-screen > .stage-banner{
+  position:absolute;
+  top:clamp(10px,2vh,20px);
+  left:50%;
+  z-index:3;
+  margin:0;
+  transform:translateX(-50%);
+  pointer-events:none;
+}
+
+
+/* ==================== 2. 右上角：說話者資料 ==================== */
+/* 外框、排版、頭像大小、手機版堆疊方式，全部直接用王關上方的 .boss-top / .boss-status（style.css），
+   所以看起來和「頭目資料」「俠客資料」完全一樣。
+   style.css 裡頭目面板有幾個欄位是用 id（#boss-name、#boss-atk-def…）設定外觀，
+   說話者卡片的欄位 id 不同，所以這裡把那幾條規則用說話者的 id 再寫一次，數值完全照抄。 */
+
+.story-top .story-speaker{ grid-column:3; }            /* 靠右（王關的頭目資料也在最右欄） */
+@media (max-width:1240px){
+  .story-top .story-speaker{ width:min(100%,340px); }  /* 視窗不夠寬時縮窄，避免碰到中間的章節名 */
+}
+.story-speaker[hidden]{ display:none; }
+.story-speaker [hidden]{ display:none !important; }    /* 沒填的 HP / ATK / DEF 整列收起來 */
+
+/* 名字（同 #boss-name） */
+#story-speaker-name{
+  grid-column:1;
+  grid-row:2;
+  align-self:start;
+  margin:0;
+  text-align:right;
+  font-family:var(--f-brush);
+  font-size:clamp(1.3rem,1.2vw + .9rem,1.8rem);
+  font-weight:400;
+  letter-spacing:.12em;
+  color:var(--cream);
+  overflow-wrap:anywhere;
+  line-height:1.25;
+}
+/* ATK、DEF（同 #boss-atk-def）；數字顏色同 #boss-atk / #boss-def */
+.story-speaker .status-atk-def{ text-align:right; }
+.story-speaker .status-atk-def .atk,
+.story-speaker .status-atk-def .def{ color:var(--gold-hi); font-weight:700; font-variant-numeric:tabular-nums; }
+/* HP 長條：頭目是紅色，玩家說話時是俠客資料的橘紅色 */
+.story-speaker .hp-fill{ background:linear-gradient(180deg,#ff6a5a,#a61d2a); }
+.story-speaker.is-hero .hp-fill{ background:linear-gradient(180deg,#ff8a4a,#c9381b); }
+
+
+/* ==================== 3. 對話文字 ==================== */
+
+#story-text{
+  margin:0;
+  min-height:3.9em;                      /* 逐字顯示時面板高度不要一直跳動 */
+  font-family:var(--f-text);
+  font-size:clamp(16px,.5vw + 11px,20px);
+  line-height:1.95;
+  letter-spacing:.04em;
+  color:var(--paper-ink);
+}
+
+/* 整句顯示完、後面還有內容時，句尾出現閃爍的小三角（由 story.js 切換 .more） */
+#story-text.more::after{
+  content:"▼";
+  display:inline-block;
+  margin-left:.5em;
+  font-size:.7em;
+  color:var(--cinnabar);
+  animation:story-more 1s ease-in-out infinite;
+}
+@keyframes story-more{
+  0%,100%{ opacity:.25; transform:translateY(-1px); }
+  50%{ opacity:1; transform:translateY(2px); }
+}
+
+/* 整個文字區可以點（點一下顯示整句、再點一下下一句） */
+#story-content{ cursor:pointer; }
+
+/* 章節結束字樣 */
+.story-end{
+  display:block;
+  padding:.6em 0;
+  text-align:center;
+  font-family:var(--f-brush);
+  font-size:clamp(20px,1.4vw + 12px,28px);
+  letter-spacing:.2em;
+  color:#3a1d12;
+}
+
+
+/* ==================== 4. 選項區、繼續按鈕、離開按鈕 ==================== */
+
+/* 選項（編號小牌由 style.css 的 .choice-button 提供，這裡負責排列與重新計數） */
+#story-options{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  counter-reset:opt;
+}
+#story-options[hidden]{ display:none; }
+
+/* 繼續：玉綠金邊大按鈕（與小關的「繼續前行」相同外觀） */
+#story-next-button{
+  display:block;
+  width:100%;
+  margin-top:4px;
+  padding:.4em 1em .5em;
+  font-family:var(--f-brush);
+  font-size:clamp(20px,1.6vw + 8px,28px);
+  letter-spacing:.2em;
+  text-align:center;
+  color:var(--cream);
+  background:linear-gradient(180deg,var(--jade-hi),var(--jade) 45%,var(--jade-lo));
+  border:1.5px solid var(--gold);
+  border-radius:6px;
+  box-shadow:0 0 0 3px #10241d, 0 0 0 4.5px var(--gold-lo), 0 8px 20px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.25);
+  text-shadow:0 2px 3px rgba(0,0,0,.6);
+  transition:filter .2s, transform .2s;
+}
+#story-next-button[hidden]{ display:none; }
+#story-next-button:hover{ filter:brightness(1.15); transform:translateY(-1px); }
+#story-next-button:active{ transform:translateY(1px); }
+
+/* 側欄底部的小字按鈕：存檔、讀檔、離開故事 */
+.story-tools{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin:2px 0 0 8px;
+}
+.story-tools button{
+  padding:.25em .9em .3em;
+  font-family:var(--f-ui);
+  font-size:.82rem;
+  letter-spacing:.14em;
+  color:var(--cream-mute);
+  background:rgba(20,12,9,.6);
+  border:1px solid var(--gold-lo);
+  border-radius:3px;
+  transition:color .2s, border-color .2s, background .2s;
+}
+.story-tools button:hover{ color:var(--cream); border-color:var(--gold); background:rgba(40,26,18,.8); }
+#story-save-info{
+  margin:6px 0 0 8px;
+  max-width:240px;
+  font-family:var(--f-ui);
+  font-size:.74rem;
+  letter-spacing:.06em;
+  line-height:1.5;
+  color:var(--cream-mute);
+  text-shadow:0 1px 2px rgba(0,0,0,.7);
+}
+.story-screen .sidebar-empty{ display:flex; flex-direction:column; }
+
+/* 教學戰鬥的提示文字、結局字樣下方的小字 */
+.story-hint{
+  display:inline-block;
+  margin-top:.3em;
+  font-size:.85em;
+  color:#8a2d1f;
+}
+.story-end-sub{
+  display:block;
+  text-align:center;
+  font-size:.7em;
+  letter-spacing:.3em;
+  color:#6b3a22;
+}
+
+
+/* ==================== 5. 開始畫面：多了第五張「故事」難度卡片 ==================== */
+
+.difficulty-group{
+  width:min(800px,100%);
+  grid-template-columns:repeat(5,minmax(0,1fr));
+}
+.difficulty-card[data-diff="story"] .difficulty-flag{ background:#7a5a2a; }
+
+
+/* ==================== 平板與手機 ==================== */
+
+@media (max-width:980px){
+  .story-screen{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    padding:10px 16px calc(16px + env(safe-area-inset-bottom,0px));
+    overflow-x:hidden;
+    overflow-y:auto;
+  }
+  /* 章節名回到正常排版，排在最上面並置中 */
+  .story-screen > .stage-banner{
+    position:relative;
+    top:auto; left:auto;
+    flex:none;
+    align-self:center;
+    transform:none;
+  }
+  .story-screen > .event-panel{ margin:8px 8px 10px; }
+  .story-panel{ grid-template-columns:minmax(0,1fr); flex:none; max-height:none; }     /* 直向堆疊時不要被壓扁，整個畫面可捲動 */
+  .story-screen > .main-panel{ flex:none; }
+  /* 說話者資料在手機上占滿整列 */
+  .story-top .story-speaker{ grid-column:1 / -1; width:100%; }
+  /* 側欄只剩玩家資料，不需要分兩欄 */
+  .story-screen .player-status{ grid-column:1 / -1; }
+  /* 離開按鈕在手機上仍要看得到：側欄改成兩欄後，這一塊獨佔整列 */
+  .story-screen .sidebar-empty{ grid-column:1 / -1; }
+}
+
+@media (max-width:760px){
+  /* 說話者資料的名字與 ATK / DEF：直向堆疊時照王關的做法置中、靠左 */
+  #story-speaker-name{ grid-row:auto; text-align:center; font-size:1.2rem; }
+  .story-speaker .status-atk-def{ text-align:left; font-size:.82rem; white-space:nowrap; }
+
+  /* 五張卡片太擠：故事卡片獨佔一整列，其餘四張照舊 */
+  .difficulty-group{ grid-template-columns:repeat(4,minmax(0,1fr)); }
+  .difficulty-card[data-diff="story"]{ grid-column:1 / -1; }
+  .difficulty-card[data-diff="story"] .difficulty-desc{ min-height:0; }
+}
+
+@media (max-width:520px){
+  .difficulty-group{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
