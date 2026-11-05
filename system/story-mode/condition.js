@@ -27,13 +27,28 @@ export function checkRequire(req){
     return true;
 };
 
-/*套用 set（旗標）與 effect（數值）。target 可以是選項或場景*/
+/*數值變動的文字，例如「最大HP +5　ATK +10　DEF +10」（只列真的有變的，沒變回傳空字串）*/
+function describeChange(before){
+    const parts = [];
+    const rows = [["maxHp", "最大HP"], ["hp", "HP"], ["atk", "ATK"], ["def", "DEF"]];
+    rows.forEach(function(row){
+        const d = playerData[row[0]] - before[row[0]];
+        if(d !== 0){ parts.push(row[1] + " " + (d > 0 ? "+" : "") + d); };
+    });
+    return parts.join("　");
+};
+
+/*套用 set（旗標）與 effect（數值）。target 可以是選項、場景或台詞。
+  回傳數值變動的文字（沒有 effect 或沒變化時是 ""），呼叫端用它顯示給玩家看*/
 export function applyConsequences(target){
     if(target.set){
         Object.assign(state.story.flags, target.set);
     };
     if(target.effect){
+        const before = { maxHp: playerData.maxHp, hp: playerData.hp, atk: playerData.atk, def: playerData.def };
         applyOptionEffect({ effect: target.effect }, Object.keys(target.effect));
         updateStatusPanel(storyScreen);
+        return describeChange(before);
     };
+    return "";
 };

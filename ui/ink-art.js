@@ -15,6 +15,7 @@ const PAL={
   rain:{sky:['#3b4a58','#6c7f86','#a2aea6','#d4d0b8'],sun:[800,300,50,'#f0ecd0'],ridges:['#6c8186','#566d73','#42585e','#2c3d43'],haze:'#cfd5c4',sunc:'#f0ecd0',rain:true},
   fire:{sky:['#2b1830','#7a2d46','#d9582f','#f6b45e'],sun:[800,520,76,'#ffe3a0'],ridges:['#5d2d49','#4a2440','#371b34','#241126'],haze:'#e47a45'},
   dawn:{sky:['#34476b','#8a6f9a','#e79a85','#fbd7a4'],sun:[1000,520,48,'#fff3d2'],ridges:['#6d6a8e','#575679','#444363','#2d2c46'],haze:'#f0b7a0'},
+  ash:{sky:['#161a28','#2f3550','#6a6074','#b79a8e'],sun:[1220,230,36,'#e9e3cf'],ridges:['#4a4a68','#3a3a58','#2c2b46','#1c1b30'],haze:'#8f879f',moon:true},
   amber:{sky:['#503161','#c25a61','#f0953f','#fad288'],sun:[680,460,62,'#fff0c4'],ridges:['#755068','#5f4059','#4b3248','#33232f'],haze:'#f3a35c'}
 };
 const SCN={
@@ -35,6 +36,8 @@ const SCN={
   summit:{p:'gold',feat:['ballfield','pineL','banner9'],ground:'#3a2b27'},
   arena3:{p:'fire',feat:['ballfield','banner9','cracks'],ground:'#3a2326',cracked:true},
   end:{p:'dusk',feat:['pagodaFar','lanterns','maple','stonepath'],ground:'#2b1e25'},
+  bazaar:{p:'dusk',feat:['bazaar'],ground:'#2a1d24'},
+  yamen:{p:'ash',feat:['yamen'],ground:'#17141d'},
   endDark:{p:'night',feat:['stars','steles','mist'],ground:'#151228'}
 };
 
@@ -181,6 +184,94 @@ const F={
     let o='';
     for(let i=0;i<9;i++){const x=i*190-40+(r()*30),h=70+r()*70;
       o+=`<g transform="translate(${r1(x)} 640)"><rect x="-70" y="-${h}" width="140" height="${h}" fill="#2a1b24"/><path d="M-96 -${h} Q-40 -${h+10} 0 -${h+60} Q40 -${h+10} 96 -${h} Q40 -${h-8} 0 -${h-4} Q-40 -${h-8} -96 -${h}Z" fill="#1f141c"/><rect x="-44" y="-${h*.6}" width="26" height="${h*.3}" fill="#ffc26a" opacity=".85"/><rect x="18" y="-${h*.6}" width="26" height="${h*.3}" fill="#ffb457" opacity=".8"/></g>`}
+    return `<g>${o}</g>`;
+  },
+  /* 江湖市集：街道兩側的商鋪樓、懸掛的酒旗幌子、橫跨街道的燈籠串，遠處是城門樓（沒有任何人物） */
+  bazaar(r,S,u){
+    const body=['#2a1b24','#301f29','#261822'], dark='#170e16';
+    const signs=['酒','茶','當','藥','棧','鏢','布','鐵'];
+    const shop=(x,base,w,h,c,sign,flip)=>{
+      const h1=h*.46, f=flip?-1:1;
+      let o=`<g transform="translate(${x} ${base})">`;
+      o+=`<rect x="${-w/2}" y="${-h}" width="${w}" height="${h}" fill="${c}"/>`;
+      o+=`<rect x="${-w/2-10}" y="${-h1-6}" width="${w+20}" height="8" fill="${dark}"/>`;
+      /* 二樓：發亮的格窗與欄杆 */
+      for(let i=0;i<2;i++){const wx=-w*.3+i*w*.34;
+        o+=`<rect x="${r1(wx)}" y="${r1(-h+h*.2)}" width="${r1(w*.24)}" height="${r1(h*.22)}" fill="#ffc26a" opacity="${r1(.72+r()*.2)}"/>
+        <path d="M${r1(wx)} ${r1(-h+h*.31)}H${r1(wx+w*.24)}M${r1(wx+w*.12)} ${r1(-h+h*.2)}V${r1(-h+h*.42)}" stroke="${c}" stroke-width="3"/>`;}
+      o+=`<path d="M${-w/2+6} ${-h1-16}H${w/2-6}" stroke="#4a2a2a" stroke-width="4"/>`;
+      for(let i=0;i<=7;i++)o+=`<rect x="${r1(-w/2+8+i*(w-18)/7)}" y="${-h1-16}" width="3" height="10" fill="#4a2a2a"/>`;
+      /* 屋頂：翹簷 */
+      o+=`<path d="M${-w/2-24} ${-h+2} Q${-w/4} ${-h-4} 0 ${r1(-h-h*.32)} Q${w/4} ${-h-4} ${w/2+24} ${-h+2} Q${w/4} ${-h+14} 0 ${-h+8} Q${-w/4} ${-h+14} ${-w/2-24} ${-h+2}Z" fill="#150c14"/>
+      <path d="M${-w/2-24} ${-h+2} q-8 -10 -14 -12 M${w/2+24} ${-h+2} q8 -10 14 -12" stroke="#150c14" stroke-width="5" fill="none"/>`;
+      /* 一樓：門面與條紋遮陽棚 */
+      o+=`<rect x="${-w*.38}" y="${r1(-h1+6)}" width="${r1(w*.76)}" height="${r1(h1-6)}" fill="#120a11"/>
+      <rect x="${-w*.3}" y="${r1(-h1+22)}" width="${r1(w*.6)}" height="${r1(h1-22)}" fill="#ffb457" opacity=".34"/>`;
+      let aw=''; const n=7;
+      for(let i=0;i<n;i++){const ax=-w*.4+i*(w*.8/n);aw+=`<path d="M${r1(ax)} ${r1(-h1+4)} h${r1(w*.8/n)} l${r1(w*.05*(i%2?1:-1)+2)} 20 h${r1(-w*.8/n)}Z" fill="${i%2?'#8e2017':'#3a1a1e'}"/>`;}
+      o+=aw;
+      /* 幌子（酒旗）：掛在屋簷邊 */
+      const bx=f*(w/2-8);
+      o+=`<g transform="translate(${r1(bx)} ${r1(-h1-4)})"><rect x="-1.5" y="-26" width="3" height="${r1(h1*.2+26)}" fill="#120a11"/><path d="M${f*2} -24 h${f*26} v${r1(h*.34)} l${f*-13} -8 l${f*-13} 8Z" fill="#8e2017"/><path d="M${f*2} -24 h${f*26} v${r1(h*.34)} l${f*-13} -8 l${f*-13} 8Z" fill="none" stroke="#f5dc92" stroke-width="1.6" opacity=".75"/><text x="${f*15}" y="${r1(h*.15)}" text-anchor="middle" font-size="19" fill="#f5dc92" font-family="serif">${sign}</text></g>`;
+      return o+'</g>';
+    };
+    let o='';
+    /* 遠處城門樓 */
+    o+=`<g transform="translate(800 706)" fill="#1a1119"><rect x="-130" y="-70" width="260" height="70"/><rect x="-62" y="-70" width="124" height="70" fill="#0d070d"/><path d="M-62 0 V-48 Q0 -76 62 -48 V0Z" fill="#0d070d"/>
+      <rect x="-90" y="-120" width="180" height="52"/><rect x="-26" y="-108" width="22" height="26" fill="#ffc26a" opacity=".7"/><rect x="4" y="-108" width="22" height="26" fill="#ffc26a" opacity=".7"/>
+      <path d="M-150 -118 Q-70 -120 0 -172 Q70 -120 150 -118 Q70 -108 0 -112 Q-70 -108 -150 -118Z"/><rect x="-6" y="-186" width="12" height="20"/></g>`;
+    /* 左右兩排商鋪，越靠近中間越小 */
+    const L=[[-30,770,300,290],[250,752,230,250],[455,736,170,205],[600,724,120,150]];
+    L.forEach((b,i)=>{o+=shop(b[0],b[1],b[2],b[3],body[i%3],signs[(i*2)%8],false);o+=shop(1600-b[0],b[1],b[2],b[3],body[(i+1)%3],signs[(i*2+1)%8],true);});
+    /* 橫跨街道的燈籠串 */
+    const str=(x0,y0,x1,y1,sag,n)=>{
+      let g=`<path d="M${x0} ${y0} Q${(x0+x1)/2} ${(y0+y1)/2+sag} ${x1} ${y1}" stroke="#120a11" stroke-width="2.4" fill="none"/>`;
+      for(let i=1;i<n;i++){const t=i/n,x=(1-t)*(1-t)*x0+2*t*(1-t)*((x0+x1)/2)+t*t*x1,y=(1-t)*(1-t)*y0+2*t*(1-t)*((y0+y1)/2+sag)+t*t*y1;
+        g+=`<circle cx="${r1(x)}" cy="${r1(y+14)}" r="30" fill="url(#lg${u})"/><rect x="${r1(x-5)}" y="${r1(y-1)}" width="10" height="4" fill="#2a160e"/><ellipse cx="${r1(x)}" cy="${r1(y+14)}" rx="9" ry="12" fill="#e9852e"/><ellipse cx="${r1(x)}" cy="${r1(y+14)}" rx="9" ry="12" fill="url(#lf${u})"/><path d="M${r1(x)} ${r1(y+26)}v10" stroke="#c9482b" stroke-width="2"/>`;}
+      return g;
+    };
+    o+=str(300,400,1300,400,120,9)+str(200,470,1400,470,80,11)+str(480,350,1120,350,90,6);
+    return `<g>${o}</g>`;
+  },
+  /* 監獄衙門：森嚴的衙門大門（匾額、肅靜迴避牌、鳴冤鼓、石獅）、高牆、望樓與牢房，火把照亮（沒有任何人物） */
+  yamen(r,S,u){
+    const c='#1a1520', c2='#241d2c', c3='#2e2638';
+    let o='';
+    /* 高牆（左右延伸）與磚縫 */
+    o+=`<rect x="-20" y="560" width="1640" height="200" fill="${c2}"/><rect x="-20" y="548" width="1640" height="16" fill="${c}"/>`;
+    for(let i=0;i<41;i++)o+=`<path d="M${i*40-20} 548 l6 -10 h28 l6 10Z" fill="${c}"/>`;
+    for(let y=590;y<760;y+=34)o+=`<path d="M-20 ${y}H1620" stroke="#120e18" stroke-width="2" opacity=".6"/>`;
+    for(let k=0;k<26;k++){const y0=590+Math.floor(r()*5)*34,x=r()*1600;o+=`<path d="M${r1(x)} ${y0}v34" stroke="#120e18" stroke-width="2" opacity=".5"/>`;}
+    /* 左：望樓 */
+    o+=`<g transform="translate(260 560)" fill="${c}"><rect x="-70" y="-190" width="140" height="190" fill="${c3}"/><rect x="-82" y="-200" width="164" height="14"/>
+      <path d="M-110 -196 Q-50 -200 0 -270 Q50 -200 110 -196 Q50 -184 0 -190 Q-50 -184 -110 -196Z"/><rect x="-5" y="-290" width="10" height="26"/>
+      <rect x="-14" y="-150" width="28" height="42" fill="#0d0910"/><rect x="-14" y="-150" width="28" height="42" fill="#ffb457" opacity=".28"/><path d="M-6 -150v42M6 -150v42" stroke="#0d0910" stroke-width="3"/></g>`;
+    /* 右：牢房（小窗與鐵欄杆、厚重鐵門） */
+    o+=`<g transform="translate(1290 560)"><rect x="-190" y="-120" width="380" height="120" fill="${c3}"/><rect x="-206" y="-132" width="412" height="16" fill="${c}"/>
+      ${[-140,-70,0,70,140].map((x,i)=>`<rect x="${x-18}" y="-92" width="36" height="34" fill="#0d0910"/><rect x="${x-18}" y="-92" width="36" height="34" fill="#ffb457" opacity="${i%2?.1:.22}"/><path d="M${x-9} -92v34M${x} -92v34M${x+9} -92v34" stroke="#3a3446" stroke-width="3"/>`).join('')}
+      <rect x="-30" y="-64" width="60" height="64" fill="#0d0910" stroke="#4b4458" stroke-width="3"/><path d="M-30 -40H30M-30 -20H30" stroke="#4b4458" stroke-width="3"/><circle cx="0" cy="-32" r="5" fill="#6a6276"/></g>`;
+    /* 中：衙門大門 */
+    o+=`<g transform="translate(800 760)">
+      <rect x="-250" y="-18" width="500" height="22" fill="#2a2230"/><rect x="-230" y="-38" width="460" height="22" fill="#30283a"/><rect x="-210" y="-58" width="420" height="22" fill="#383044"/>
+      <rect x="-190" y="-260" width="380" height="204" fill="${c3}"/>
+      <rect x="-170" y="-240" width="340" height="184" fill="#0d0910"/>
+      ${[-110,0,110].map((x,i)=>`<rect x="${x-50}" y="-224" width="100" height="168" fill="${i==1?'#7a1f1a':'#5e1a18'}" stroke="#2a0c0c" stroke-width="3"/><path d="M${x} -224V-56" stroke="#2a0c0c" stroke-width="3"/>${[0,1,2,3].map(k=>[0,1,2,3,4].map(m=>`<circle cx="${x-40+m*20}" cy="${-205+k*32}" r="3.2" fill="#d6a845"/>`).join('')).join('')}`).join('')}
+      <rect x="-210" y="-270" width="20" height="214" fill="#6e2018"/><rect x="190" y="-270" width="20" height="214" fill="#6e2018"/><rect x="-96" y="-270" width="12" height="214" fill="#6e2018"/><rect x="84" y="-270" width="12" height="214" fill="#6e2018"/>
+      <rect x="-230" y="-290" width="460" height="26" fill="#6e2018"/><rect x="-230" y="-264" width="460" height="8" fill="#2a0c0c"/>
+      <g fill="${c}"><path d="M-300 -290 Q-150 -292 0 -380 Q150 -292 300 -290 Q150 -270 0 -278 Q-150 -270 -300 -290Z"/><path d="M-230 -350 Q-110 -352 0 -430 Q110 -352 230 -350 Q110 -334 0 -342 Q-110 -334 -230 -350Z"/>
+      <rect x="-210" y="-352" width="420" height="62" fill="#221a29"/><rect x="-10" y="-452" width="20" height="30"/><path d="M-30 -428 q30 -26 60 0Z"/><path d="M-300 -290 q-14 -4 -22 -22 M300 -290 q14 -4 22 -22" stroke="${c}" stroke-width="7" fill="none"/></g>
+      <rect x="-86" y="-342" width="172" height="46" fill="#120c0f" stroke="#c9a24a" stroke-width="3"/><text x="0" y="-308" text-anchor="middle" font-size="34" fill="#e8c76a" font-family="serif" letter-spacing="14">衙門</text>
+    </g>`;
+    /* 肅靜、迴避牌 */
+    [[470,'肅靜'],[1130,'迴避']].forEach(b=>{o+=`<g transform="translate(${b[0]} 760)"><rect x="-4" y="-150" width="8" height="150" fill="#120c10"/><rect x="-34" y="-250" width="68" height="124" rx="3" fill="#e7dcc0"/><rect x="-30" y="-246" width="60" height="116" fill="none" stroke="#121018" stroke-width="2"/><text x="0" y="-206" text-anchor="middle" font-size="30" fill="#1a1016" font-family="serif">${b[1][0]}</text><text x="0" y="-166" text-anchor="middle" font-size="30" fill="#1a1016" font-family="serif">${b[1][1]}</text></g>`;});
+    /* 鳴冤鼓 */
+    o+=`<g transform="translate(1250 760)"><path d="M-46 0L-36 -90M46 0L36 -90M-40 -50H40" stroke="#120c10" stroke-width="7" fill="none"/><ellipse cx="0" cy="-92" rx="40" ry="40" fill="#6e2018"/><ellipse cx="0" cy="-92" rx="40" ry="40" fill="none" stroke="#2a0c0c" stroke-width="5"/><ellipse cx="0" cy="-92" rx="30" ry="30" fill="#8a2a22"/><circle cx="0" cy="-92" r="6" fill="#d6a845"/></g>`;
+    /* 石獅（簡化剪影） */
+    [[560,1],[1040,-1]].forEach(b=>{o+=`<g transform="translate(${b[0]} 760) scale(${b[1]} 1)" fill="#3a3248"><rect x="-34" y="-30" width="68" height="30"/><path d="M-22 -30 q-6 -34 4 -52 q12 -26 34 -18 q14 6 10 24 q-4 14 -10 24 q10 8 8 22Z"/><circle cx="6" cy="-84" r="13"/><path d="M-10 -92 q-14 -6 -14 8 q4 14 12 12 M20 -92 q14 -4 14 10 q-4 12 -10 10" fill="none" stroke="#3a3248" stroke-width="8"/></g>`;});
+    /* 火把 */
+    [[700,'a'],[900,'b']].forEach(b=>{o+=`<g transform="translate(${b[0]} 700)"><circle cx="0" cy="-60" r="96" fill="url(#lg${u})"/><rect x="-3" y="-60" width="6" height="64" fill="#2a160e"/><path d="M0 -112 q-15 22 -9 44 q9 12 18 0 q6 -22 -9 -44Z" fill="#ff9a3c"/><path d="M0 -96 q-8 14 -5 28 q5 6 10 0 q3 -14 -5 -28Z" fill="#ffe19a"/></g>`;});
+    /* 屋簷下的白燈籠 */
+    [[600,-250],[1000,-250]].forEach(b=>{});
     return `<g>${o}</g>`;
   },
   steles(r,S){let o='';for(let i=0;i<28;i++){const x=40+i*56+r()*20,h=90+r()*130,y=700+r()*120,w=34+r()*16;o+=`<path d="M${r1(x)} ${r1(y)} v${-h} q${w/2} -14 ${r1(w)} 0 v${h}Z" fill="${i%3?'#2b2745':'#34305a'}" stroke="#4d4880" stroke-width="1.5" opacity="${r1(.65+r()*.35)}"/>`}return o},

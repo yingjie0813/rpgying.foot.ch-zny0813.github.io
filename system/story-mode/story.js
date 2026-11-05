@@ -20,7 +20,6 @@ import {
     storySpeakerAtkDef, storySpeakerAtk, storySpeakerDef, playerNameInput
 } from "../dom.js";
 import { fmt, initialStatusData, updateStatusPanel } from "../status.js";
-import { LEVEL_NUM } from "../progress.js";
 import { applyPortrait } from "../portrait.js";
 import { egg } from "../debug.js";
 import { refreshDifficultyCards } from "../difficulty.js";
@@ -30,13 +29,16 @@ import { checkRequire, applyConsequences } from "./condition.js";
 import { validateChapters } from "./validate.js";
 import { getEnding, recordEnding } from "./ending.js";
 import { readSave, writeSave } from "./save.js";
+import { showStoryEnding } from "../result.js";
+import { endingProgress, endingFriends } from "./ending.js";
+import { storyVs } from "../../ui/vs-panel.js";
 import { makeFoe, snapshotPlayer, restorePlayer, applyFixedPlayer, startScriptedBattle, startFreeBattle } from "./battle.js";
 
 let chapter = null;     /*目前章節*/
+let pendingEffect = "";   /*場景自己的 effect 變動文字，等第一句台詞出現時一起顯示*/
 let scene = null;       /*目前場景（戰鬥、結局播放時是臨時組出來的場景物件）*/
 let typer = null;       /*目前這句台詞的打字機控制器*/
-let phase = "idle";     /*"line" 播台詞中｜"end" 章節／結局結束畫面｜"idle" 沒在播*/
-let endAction = null;   /*"end" 畫面按下繼續時要做的事*/
+let phase = "idle";     /*"line" 播台詞中｜"idle" 沒在播（戰鬥中、結局總結畫面、離開後）*/
 let inBattle = false;   /*教學戰鬥播放中（這時不能存檔）*/
 let inEnding = false;   /*結局播放中（這時不能存檔）*/
 let validated = false;
@@ -102,10 +104,6 @@ function clearOptions(){
     storyOptions.hidden = true;
 };
 
-function chapterLabel(index){
-    return chapter.label || ("第" + (LEVEL_NUM[index] || (index + 1)) + "章");     /*章節檔可用 label 自訂，例如 label: "第五章"*/
-};
-
 /*章節名：置中顯示在畫面最上方（只顯示章節名，不含「第 n 章」）*/
 function updateChapterPanel(){
     storyBanner.textContent = "";
@@ -128,6 +126,7 @@ export function startStory(){
 
     state.story.flags = {};
     state.story.visits = {};
+    state.story.defeated = [];
     state.story.entry = null;
     state.storySpeaker = null;
     state.storyFoe = null;
@@ -152,24 +151,24 @@ export function startStory(){
 function exitStory(){
     if(typer){ typer.cancel(); typer = null; };
     phase = "idle";
-    endAction = null;
     inBattle = false;
     inEnding = false;
     state.storySpeaker = null;
     state.storyFoe = null;
     state.storyBattle = null;
+    storyVs.close();
     storyScreen.hidden = true;
     startScreen.hidden = false;
     refreshDifficultyCards();
 };
 
 /* ---------- 前往哪裡：場景、章節、結局 ---------- */
-/* next / onWin / onLose / onVisit / 章節的 next 都可以寫：
-     "s3"            同一章的場景
-     "ch05"          另一章（從該章的 start 開始）
-     "ch05:s3"       另一章的某個場景
-     "ending:xxx"    結局（data/story-mode/endings.js）
-   同一章裡有同名場景時，優先當成場景。 */
+/* next / onWin / onLose / onVisit / 章節的 next 只認下面這幾種寫法（寫錯不會亂跳，會在畫面和主控台顯示錯誤）：
+     "s3"            「目前這一章」的場景（只找這一章，找不到就是錯誤，不會跑去別章）
+     "ch05.s3"       另一章（ch05）的某個場景。跨章一定要寫「章節id.場景id」（寫成 "ch05:s3" 也行）
+     "ch05"          另一章，從該章的 start 開始
+     "ending:xxx"    結局（data/story-mode/endings.js），一定要加 ending:
+   這一章裡有場景和章節 id 同名時，優先當成場景。 */
 
 function findChapterIndex(id){
     for(let i = 0; i < chapters.length; i++){
@@ -186,10 +185,10 @@ function resolveTarget(target){
     if(chapter && chapter.scenes[key]){
         return { type: "scene", chapterIndex: state.story.chapterIndex, sceneId: key };
     };
-    const colon = key.indexOf(":");
-    if(colon > 0){
-        const ci = findChapterIndex(key.slice(0, colon));
-        const sid = key.slice(colon + 1);
+    const dot = key.search(/[.:]/);
+    if(dot > 0){
+        const ci = findChapterIndex(key.slice(0, dot));
+        const sid = key.slice(dot + 1);
         if(ci >= 0 && chapters[ci].scenes[sid]){
             return { type: "scene", chapterIndex: ci, sceneId: sid };
         };
@@ -201,11 +200,33 @@ function resolveTarget(target){
     return null;
 };
 
+/*目標寫錯：不要偷偷往下跳，直接在畫面上講清楚錯在哪（同時印在主控台），讓作者馬上看到*/
+function targetError(target, where){
+    const chId = chapter ? chapter.id : "?";
+    const key = String(target).trim();
+    let hint = "";
+    const owners = chapters.filter(function(c){ return c.scenes && c.scenes[key]; });
+    if(getEnding(key)){
+        hint = "（這是結局 id，要寫成 ending:" + key + "）";
+    }else if(owners.length){
+        hint = "（目前這一章 " + chId + " 沒有場景 " + key + "；" + owners.map(function(c){ return c.id; }).join("、") + " 有。要去別章請寫「章節id.場景id」，例如 " + owners[0].id + "." + key + "）";
+    };
+    const msg = "[故事 " + chId + "] " + (where || "") + "找不到要前往的地方：" + key + hint;
+    console.error(msg);
+    if(typer){ typer.cancel(); typer = null; };
+    inBattle = false;
+    storyVs.close();
+    const safe = function(t){ return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); };
+    playDynamic({
+        lines: [{ who: "系統消息", text: "【文本錯誤】章節 " + safe(chId) + " " + (where || "") + "找不到要前往的地方：<b>" + safe(key) + "</b><br>" + safe(hint) + "<br>請修改章節檔的 next / onWin / onLose / onVisit。" }],
+        options: [{ text: "回到開始畫面", run: function(){ exitStory(); } }]
+    });
+};
+
 function go(target){
     const r = resolveTarget(target);
     if(!r){
-        console.warn("[故事 " + (chapter ? chapter.id : "?") + "] 找不到要前往的地方：" + target + "，章節提前結束");
-        endChapter();
+        targetError(target);
     }else if(r.type === "ending"){
         playEnding(r.id);
     }else if(r.type === "chapter"){
@@ -236,18 +257,19 @@ function captureEntry(){
     return {
         player: snapshotPlayer(),
         flags: JSON.parse(JSON.stringify(state.story.flags)),
-        visits: JSON.parse(JSON.stringify(state.story.visits))
+        visits: JSON.parse(JSON.stringify(state.story.visits)),
+        defeated: state.story.defeated.slice()
     };
 };
 
 function showScene(id){
     const found = chapter.scenes[id];
     if(!found){
-        console.warn("[故事 " + chapter.id + "] 找不到場景：" + id + "，章節提前結束");
-        endChapter();
+        targetError(id);
         return;
     };
     inBattle = false;
+    storyVs.close();                          /*離開戰鬥場景：關掉中央的出拳對戰面板*/
     state.story.sceneId = id;
     state.story.entry = captureEntry();
 
@@ -262,7 +284,7 @@ function showScene(id){
 
     scene = found;
     state.story.bg = scene.bg || chapter.bg || "road";
-    applyConsequences(scene);
+    pendingEffect = applyConsequences(scene);      /*場景本身的 effect：顯示在第一句台詞*/
     renderSpeaker();
 
     if(scene.battle){
@@ -282,6 +304,7 @@ function playDynamic(obj){
 function showLine(index){
     const lines = scene.lines || [];
     if(index >= lines.length){
+        pendingEffect = "";
         afterLines();
         return;
     };
@@ -289,7 +312,9 @@ function showLine(index){
     const line = lines[index];
 
     /*這句可以帶 set / effect（和場景、選項一樣）；戰鬥內部另用 run*/
-    if(line.set || line.effect){ applyConsequences(line); };
+    let effectText = "";
+    if(line.set || line.effect){ effectText = applyConsequences(line); };
+    if(pendingEffect){ effectText = effectText ? pendingEffect + "　" + effectText : pendingEffect; pendingEffect = ""; };
     if(typeof line.run === "function"){
         line.run();
         updateStatusPanel(storyScreen);
@@ -302,7 +327,8 @@ function showLine(index){
     storyText.classList.remove("done", "more");
     if(typer){ typer.cancel(); };
     const speed = line.speed !== undefined ? line.speed : (scene.speed !== undefined ? scene.speed : chapter.speed);
-    typer = typeInto(storyText, fmt(line.text), { speed: speed, onDone: onLineTyped });
+    const shown = fmt(line.text) + (effectText ? '<br><span class="story-effect">【' + effectText + '】</span>' : "");
+    typer = typeInto(storyText, shown, { speed: speed, onDone: onLineTyped });
 };
 
 /*這一句已經完整顯示：如果是場景最後一句且有選項，這時才出現選項*/
@@ -385,6 +411,9 @@ function runBattle(b){
             state.storyFoe = null;
             if(fixed || result === "lose"){ restorePlayer(snap); };     /*固定數值的戰鬥、輸掉的戰鬥：還原成戰鬥前的樣子*/
             updateStatusPanel(storyScreen);
+            if(result === "win" && foe.name && state.story.defeated.indexOf(foe.name) < 0){
+                state.story.defeated.push(foe.name);      /*結局面板的「擊敗」*/
+            };
             const target = result === "win" ? (b.onWin || home.next) : b.onLose;
             if(target){
                 go(target);
@@ -412,45 +441,34 @@ function runBattle(b){
 
 /* ---------- 章節結束與結局 ---------- */
 
+/*章節結束：不顯示任何「完」字樣，直接接下一章。
+  接哪一章：章節檔寫了 next 就照它（"end" = 回到開始畫面），沒寫就接 index.js 陣列裡的下一章，沒有下一章就回開始畫面。*/
 function endChapter(){
     if(typer){ typer.cancel(); typer = null; };
-    phase = "end";
     clearOptions();
-    setSpeaker(null);
-    storyText.classList.remove("more");
-    storyText.classList.add("done");
     const index = state.story.chapterIndex;
-    storyText.innerHTML = '<span class="story-end">—— ' + chapterLabel(index) + '　' + chapter.title + '　完 ——</span>';
-
-    /*接哪一章：章節檔寫了 next 就照它（"end" = 回到開始畫面），沒寫就接陣列裡的下一章*/
-    let label;
     if(chapter.next === "end"){
-        endAction = exitStory;
-        label = "回到開始畫面";
+        exitStory();
     }else if(chapter.next){
-        const target = chapter.next;
-        endAction = function(){ go(target); };
-        label = String(target).indexOf("ending:") === 0 ? "繼續" : "進入下一章";
+        go(chapter.next);
     }else if(chapters[index + 1]){
-        endAction = function(){ startChapter(index + 1); };
-        label = "進入下一章";
+        startChapter(index + 1);
     }else{
-        endAction = exitStory;
-        label = "回到開始畫面";
+        exitStory();
     };
-    showNextButton(label);
 };
 
 function playEnding(id){
     const ending = getEnding(id);
     if(!ending){
-        console.warn("[故事] 找不到結局：" + id + "（請檢查 data/story-mode/endings.js）");
-        endChapter();
+        console.warn("[故事] 找不到結局：" + id + "（請檢查 data/story-mode/endings.js），回到開始畫面");
+        exitStory();
         return;
     };
     if(typer){ typer.cancel(); typer = null; };
     inEnding = true;
     inBattle = false;
+    storyVs.close();
     state.story.bg = ending.bg || "end";
     storyBanner.innerHTML = "";
     const b = document.createElement("b");
@@ -458,24 +476,26 @@ function playEnding(id){
     storyBanner.appendChild(b);
     playDynamic({
         lines: ending.lines || [],
-        then: function(){ showEndingCard(id, ending); }
+        then: function(){ finishEnding(id, ending); }
     });
 };
 
-function showEndingCard(id, ending){
+/*結局的台詞播完：記錄達成，顯示總結面板（和通關、倒下時的結算畫面同一種）*/
+function finishEnding(id, ending){
     if(typer){ typer.cancel(); typer = null; };
-    phase = "end";
+    phase = "idle";
     clearOptions();
     setSpeaker(null);
     const isNew = recordEnding(id);
-    storyText.classList.remove("more");
-    storyText.classList.add("done");
-    let html = '<span class="story-end">—— 結局：' + (ending.title || id) + ' ——</span>';
-    if(ending.kind){ html += '<span class="story-end-sub">' + ending.kind + '</span>'; };
-    if(isNew){ html += '<span class="story-end-sub">新結局達成！</span>'; };
-    storyText.innerHTML = html;
-    endAction = exitStory;
-    showNextButton("回到開始畫面");
+    showStoryEnding({
+        id: id,
+        ending: ending,
+        isNew: isNew,
+        progress: endingProgress(),
+        friends: endingFriends(ending),
+        defeated: state.story.defeated.slice(),
+        bg: state.story.bg
+    });
 };
 
 /* ---------- 存檔與讀檔（一個欄位） ---------- */
@@ -537,6 +557,7 @@ function doLoad(){
     applyPortrait(playerData, function(){ updateStatusPanel(storyScreen); });
     state.story.flags = JSON.parse(JSON.stringify(entry.flags || {}));
     state.story.visits = JSON.parse(JSON.stringify(entry.visits || {}));
+    state.story.defeated = Array.isArray(entry.defeated) ? entry.defeated.slice() : [];
     state.storySpeaker = null;
     updateStatusPanel(storyScreen);
     startChapter(ci, data.sceneId);
@@ -568,10 +589,6 @@ function confirmButton(button, confirmText, needs, action){
 /* ---------- 推進（繼續按鈕、點對話框、Enter 都走這裡） ---------- */
 
 function advance(){
-    if(phase === "end"){
-        if(endAction){ endAction(); };
-        return;
-    };
     if(phase !== "line"){ return; };
     if(typer && typer.isTyping()){
         typer.skip();               /*先把整句顯示出來*/

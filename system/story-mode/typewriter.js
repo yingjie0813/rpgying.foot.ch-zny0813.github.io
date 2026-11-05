@@ -27,7 +27,8 @@ export function typeInto(el, html, options){
     const opts = options || {};
     const units = toUnits(html);
     const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const speed = reduce ? 0 : (typeof opts.speed === "number" ? opts.speed : DEFAULT_SPEED);
+    /*作者在章節/場景/台詞明確寫了 speed 就照寫的；沒寫時，如果作業系統開了「減少動畫」才改成立刻顯示*/
+    const speed = typeof opts.speed === "number" ? opts.speed : (reduce ? 0 : DEFAULT_SPEED);
 
     let shown = 0;          /*已顯示到第幾個單位*/
     let timer = null;

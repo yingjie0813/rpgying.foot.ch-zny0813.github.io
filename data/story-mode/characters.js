@@ -63,8 +63,15 @@ export const characters = {
         maxHp: 80, atk: 12, def: 9,
         description: ""
     },
-    "山賊群": {
-        name: "山賊群",
+        "蘇雪": {
+        name: "蘇雪",
+        img: "",
+        maxHp: 80, atk: 12, def: 9,
+        description: ""
+    },
+
+    "山賊甲": {
+        name: "山賊甲",
         img: "https://www.vw.idv.tw/vwpic/npc-a.jpeg",
         maxHp: 10, atk: 1, def: 100,
         description: ""

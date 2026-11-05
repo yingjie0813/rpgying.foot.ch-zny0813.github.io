@@ -3,6 +3,7 @@
    瀏覽器不允許儲存時，至少在這次開啟期間有效。 */
 
 import { endings } from "../../data/story-mode/endings.js";
+import { state } from "../state.js";
 
 const KEY = "jianghu_yeqiu_story_endings";     /*key 不可隨意更動，否則舊紀錄會失效*/
 let memory = {};
@@ -39,4 +40,18 @@ export function endingProgress(){
     const ids = Object.keys(endings);
     const got = ids.filter(function(id){ return !!all[id]; }).length;
     return { got: got, total: ids.length };
+};
+
+/*結局面板的「交好的人」：endings.js 的 friends 是 { 名字: 旗標 }（旗標也可以寫成陣列，全部成立才算），
+  這裡檢查章節裡 set 過的旗標，成立的名字依寫的順序列出*/
+export function endingFriends(ending){
+    const friends = ending && ending.friends;
+    const result = [];
+    if(!friends || typeof friends !== "object"){ return result; };
+    const flags = state.story.flags;
+    Object.keys(friends).forEach(function(name){
+        const need = Array.isArray(friends[name]) ? friends[name] : [friends[name]];
+        if(need.every(function(f){ return !!flags[f]; })){ result.push(name); };
+    });
+    return result;
 };

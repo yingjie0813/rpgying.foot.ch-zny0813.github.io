@@ -17,6 +17,7 @@ import { calcDmg } from "../battle/damage.js";
 import { startStoryBattle } from "../battle/flow.js";
 import { bossScreen, storyScreen } from "../dom.js";
 import { battleFlow } from "../../data/battle-flow.js";
+import { storyVs } from "../../ui/vs-panel.js";
 
 const RPS_LABEL = { rock: "石頭", scissors: "剪刀", paper: "布" };
 const RPS_ORDER = ["rock", "scissors", "paper"];
@@ -152,6 +153,7 @@ export function startScriptedBattle(b, foe, api){
     const rounds = b.rounds;
     let index = 0;
     state.storyFoe = foe;
+    storyVs.open(playerData.name, foe.name);      /*故事畫面中央的出拳對戰面板（story.js 離開戰鬥場景時會關掉）*/
 
     function finish(result){
         state.storyFoe = null;
@@ -169,8 +171,15 @@ export function startScriptedBattle(b, foe, api){
         };
     };
 
+    /*面板上顯示的敵人招式名稱（沒寫 名稱 就不顯示）*/
+    function moveLabel(mv){
+        const nm = mv.move && typeof mv.move.名稱 === "string" ? fmt(mv.move.名稱).replace(/<[^>]*>/g, "").trim() : "";
+        return nm;
+    };
+
     /*顯示敵人的「運氣」（預兆）與提示，然後讓玩家選拳*/
     function choose(round, mv, again){
+        storyVs.choose(moveLabel(mv));
         let text;
         if(again){
             text = round.hint || "（請重新選擇）";
@@ -199,11 +208,16 @@ export function startScriptedBattle(b, foe, api){
         const plan = planDamage(round, result, foe);
         const consequence = (mv.move.後果 || [])[RESULT_ORDER.indexOf(result)] || "";
         const lines = [
-            { who: foe, text: fmt(mv.move.攻擊 || `${foe.name}出手了！`) },
+            {
+                who: foe,
+                text: fmt(mv.move.攻擊 || `${foe.name}出手了！`),
+                run: function(){ storyVs.action(type, moveLabel(mv)); }
+            },
             {
                 who: foe,
                 text: fmt(consequence) + (plan.text ? `<br><br>${plan.text}` : ""),
-                run: function(){      /*這句顯示的同時才扣血*/
+                run: function(){      /*這句顯示的同時才扣血，面板同步顯示雙方出拳、勝負與傷害*/
+                    storyVs.result(type, mv.type, result, plan.toFoe, plan.toPlayer);
                     if(isNum(foe.maxHp)){ foe.hp = Math.max(0, (isNum(foe.hp) ? foe.hp : foe.maxHp) - plan.toFoe); };
                     playerData.hp = Math.max(0, playerData.hp - plan.toPlayer);
                 }

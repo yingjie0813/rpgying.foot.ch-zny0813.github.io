@@ -211,6 +211,14 @@
   font-size:.85em;
   color:#8a2d1f;
 }
+/* 數值變動提示（台詞或選項的 effect） */
+.story-effect{
+  display:inline-block;
+  margin-top:.3em;
+  font-weight:700;
+  letter-spacing:.04em;
+  color:#1f6b4a;
+}
 .story-end-sub{
   display:block;
   text-align:center;
@@ -272,4 +280,71 @@
 
 @media (max-width:520px){
   .difficulty-group{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+
+/* 教學戰鬥的對戰面板：沒有戰鬥時隱藏（.vs-overlay 本身是 display:grid，會蓋過 hidden） */
+.story-screen .vs-overlay[hidden]{ display:none; }
+
+/* 故事畫面的場景區比王關矮，所以教學戰鬥的對戰面板縮小一點，並在面板出現時保留足夠高度 */
+.story-screen .vsbox{ gap:4px; padding:10px clamp(12px,2vw,26px) 12px; }
+.story-screen .plateau{ width:clamp(52px,6.2vw,76px); }
+.story-screen .vs-mid{ font-size:clamp(30px,4vw,48px); }
+.story-screen .verdict{ font-size:clamp(26px,3.4vw,42px); }
+.story-screen .mv{ font-size:clamp(15px,1.3vw + 4px,20px); }
+.story-screen .scene-panel:has(.vs-overlay:not([hidden])){ min-height:240px; }
+
+/* ==================== 左上「俠客資料」與右上「角色資料」同樣大小（電腦版） ==================== */
+/* 兩張卡片用同一組寬、高：寬 = 左欄寬度（264px 扣掉左右留白）；高 = 隨視窗高度，兩邊一定一樣。
+   右邊角色資料的內部排版改成和左邊俠客資料相同（頭像 64px、HP 條、ATK / DEF），只是頭像在右側。 */
+@media (min-width:981px){
+  /* 高度用 min-height（不是固定 height）：內容比較多時卡片會自己長高，絕對不會把 ATK / DEF 切掉。
+     兩張卡片排版相同，所以預設一樣高；矮螢幕（≤820px，style.css 有收緊間距）用較矮的值。 */
+  .story-screen{ --story-card-w:248px; --story-card-h:238px; }
+
+  .story-screen .player-status,
+  .story-top .story-speaker{
+    flex:none;
+    box-sizing:border-box;
+    width:var(--story-card-w);
+    min-height:var(--story-card-h);
+  }
+
+  .story-top .story-speaker{
+    grid-template-columns:minmax(0,1fr) 64px;
+    grid-template-rows:auto auto auto auto 1fr;
+    column-gap:12px;
+    padding:14px 16px 16px;
+  }
+  .story-top .story-speaker .panel-heading{ margin-bottom:10px; }
+  .story-top .story-speaker .emblem-slot,
+  .story-top .story-speaker .emblem-slot:has(.emblem){
+    grid-column:2;
+    grid-row:2 / 4;
+    width:64px;
+    height:64px;
+    transform:none;
+  }
+  .story-top .story-speaker .emblem{ height:100%; aspect-ratio:auto; container-type:normal; }
+  .story-top .story-speaker .emblem .seal{ width:56%; font-size:26px; }
+  #story-speaker-name{ align-self:center; font-size:1.45rem; }
+  /* 血量列、血條、ATK/DEF 佔滿整行（用 id 提高優先權，蓋過 style.css 裡「頭目資料只佔文字欄」的規則） */
+  #story-speaker .status-info,
+  #story-speaker .hp-bar,
+  #story-speaker .status-atk-def{ grid-column:1 / -1; }
+  #story-speaker .status-info{ grid-row:4; margin:12px 0 4px; }
+  #story-speaker .hp-bar{ grid-row:5; height:11px; }
+  #story-speaker .status-atk-def{ grid-row:6; font-size:.92rem; align-self:start; margin-top:12px; }
+
+  /* 戰鬥（教學戰鬥）的對戰面板：放在「整個畫面」的正中央，而不是右側欄的中央
+     （右側欄比整個畫面少了左欄 + 間距，所以往左移一半） */
+  .story-screen .vs-overlay{ transform:translateX(calc(-0.5 * (264px + clamp(12px,1.6vw,22px)))); }
+}
+
+/* 矮螢幕（筆電）：左邊俠客資料有收緊間距（style.css），右邊照同樣收緊，才會一樣高、內容位置也一樣 */
+@media (min-width:981px) and (max-height:820px){
+  .story-screen{ --story-card-h:212px; }
+  .story-top .story-speaker{ padding:10px 14px 12px; }
+  .story-top .story-speaker .panel-heading{ margin-bottom:8px; padding-bottom:4px; font-size:1rem; }
+  #story-speaker .status-info{ margin:8px 0 3px; }
+  #story-speaker .status-atk-def{ margin-top:8px; padding-top:6px; line-height:1.6; }
 }

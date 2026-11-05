@@ -38,7 +38,8 @@ export const state = {
         flags: {},              /*劇情旗標（選項的 set 會寫在這裡，require 會讀這裡）*/
         bg: "",                 /*目前背景場景名（ui/background.js 讀取）*/
         visits: {},             /*每個場景被進入過幾次（"章節id/場景id" → 次數，onVisit 使用）*/
-        entry: null             /*進入目前場景那一刻的玩家數值、旗標、次數（存檔用）*/
+        defeated: [],           /*這一局打贏過的戰鬥敵人名字（結局面板的「擊敗」用）*/
+        entry: null             /*進入目前場景那一刻的玩家數值、旗標、次數、擊敗名單（存檔用）*/
     },
     storySpeaker: null,         /*目前說話的角色物件（右上角卡片用）*/
     storyBattle: null,          /*故事模式的「自由戰鬥」進行中時有值：{ onEnd(result) }，戰鬥結束時由 controls.js 呼叫*/

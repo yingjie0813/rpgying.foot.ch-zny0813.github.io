@@ -48,7 +48,10 @@ export function setScene(key, seed){
 /*依目前畫面決定要用哪一張背景：回傳 [場景名, 種子]*/
 export function pickScene(){
     const lv = major();
-    if(resultScreen && !resultScreen.hidden){ return [resultScreen.dataset.kind === 'clear' ? 'end' : 'endDark', 5]; }
+    if(resultScreen && !resultScreen.hidden){
+        if(resultScreen.dataset.kind === 'ending'){ return [state.story.bg || 'end', 5]; }   // 故事結局：沿用結局的背景
+        return [resultScreen.dataset.kind === 'clear' ? 'end' : 'endDark', 5];
+    }
     if(storyScreen && !storyScreen.hidden){ return [state.story.bg || 'road', 1]; }   // 故事模式：背景由章節/場景的 bg 決定
     if(!bossScreen.hidden){ return [SCENES_BOSS[lv - 1], lv]; }
     if(!gameScreen.hidden){
